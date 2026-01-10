@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASTRA - Crew Status Dashboard</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts - Orbitron (Space Theme) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        space: {
+                            dark: '#0a0a0f',
+                            deeper: '#05050a',
+                            purple: '#6366f1',
+                            cyan: '#22d3ee',
+                            pink: '#ec4899'
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'monospace'],
+                        inter: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-space-dark min-h-screen font-inter text-white overflow-x-hidden">
+    
+    <!-- Stars Background -->
+    <div class="stars-container fixed inset-0 pointer-events-none z-0">
+        <div id="stars"></div>
+        <div id="stars2"></div>
+        <div id="stars3"></div>
+    </div>
+
+    <!-- Floating Planets (Decorative) -->
+    <div class="fixed top-40 right-20 w-40 h-40 rounded-full bg-gradient-to-br from-indigo-600/20 to-purple-600/20 blur-2xl pointer-events-none"></div>
+    <div class="fixed bottom-20 left-10 w-56 h-56 rounded-full bg-gradient-to-br from-cyan-600/10 to-teal-600/10 blur-3xl pointer-events-none"></div>
+
+    <!-- Navigation -->
+    <nav class="relative z-50 border-b border-white/10 backdrop-blur-md bg-space-dark/50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <a href="index.html" class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 flex items-center justify-center glow-cyan">
+                        <span class="font-orbitron font-bold text-lg">A</span>
+                    </div>
+                    <span class="font-orbitron font-bold text-xl tracking-wider">ASTRA</span>
+                </a>
+
+                <!-- Nav Links -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="index.html" class="nav-link">Stress Check</a>
+                    <a href="crew.html" class="nav-link active">Crew Status</a>
+                    <a href="games.html" class="nav-link">Relaxation</a>
+                </div>
+
+                <!-- Connection Status & User Profile -->
+                <div class="flex items-center gap-4">
+                    <!-- Connection Status -->
+                    <div id="connectionStatus" class="connection-status hidden md:flex">
+                        <div class="connection-dot online"></div>
+                        <span class="text-gray-400">Connected</span>
+                    </div>
+
+                    <!-- User Profile -->
+                    <div id="userSection" class="flex items-center gap-4">
+                        <div id="userLoggedOut">
+                            <a href="login.html" class="btn-primary text-sm px-4 py-2">Login</a>
+                        </div>
+                        <div id="userLoggedIn" class="hidden flex items-center gap-3">
+                            <span id="userName" class="text-sm text-gray-300 hidden lg:block"></span>
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center cursor-pointer">
+                                <span id="userInitial" class="font-bold text-sm">A</span>
+                            </div>
+                            <button onclick="logout()" class="text-gray-400 hover:text-white text-sm hidden lg:block">Logout</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuBtn" class="md:hidden text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobileMenu" class="hidden md:hidden mt-4 pb-4 border-t border-white/10 pt-4">
+                <div class="flex flex-col gap-4">
+                    <a href="index.html" class="nav-link">Stress Check</a>
+                    <a href="crew.html" class="nav-link active">Crew Status</a>
+                    <a href="games.html" class="nav-link">Relaxation</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="relative z-10 max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- Page Header -->
+        <section class="mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h1 class="font-orbitron text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        Crew Status Dashboard
+                    </h1>
+                    <p class="text-gray-400">
+                        Real-time monitoring of your crewmates' well-being. Privacy-first: only stress levels are shared.
+                    </p>
+                </div>
+                <div class="flex gap-3">
+                    <button 
+                        onclick="requestNotificationPermission()"
+                        class="btn-secondary text-sm"
+                        title="Enable browser notifications"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        <span class="hidden sm:inline">Notifications</span>
+                    </button>
+                    <button 
+                        onclick="refreshCrewData()"
+                        class="btn-primary text-sm"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span class="hidden sm:inline">Refresh</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Cards -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <!-- Total Crew -->
+            <div class="card p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-orbitron text-2xl font-bold" id="crewCount">--</div>
+                        <div class="text-gray-400 text-sm">Total Crew</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Online -->
+            <div class="card p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-orbitron text-2xl font-bold text-green-400" id="onlineCount">--</div>
+                        <div class="text-gray-400 text-sm">Online Now</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Alerts -->
+            <div class="card p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center relative">
+                        <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <span id="alertsBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center hidden">0</span>
+                    </div>
+                    <div>
+                        <div class="font-orbitron text-2xl font-bold text-yellow-400" id="alertsCount">0</div>
+                        <div class="text-gray-400 text-sm">Active Alerts</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- High Stress -->
+            <div class="card p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-orbitron text-2xl font-bold text-red-400" id="highStressCount">0</div>
+                        <div class="text-gray-400 text-sm">Need Support</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Grid -->
+        <div class="grid lg:grid-cols-3 gap-8">
+            
+            <!-- Crew List (2 columns) -->
+            <div class="lg:col-span-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="font-orbitron font-bold text-lg">Crew Members</h2>
+                                    <p class="text-gray-400 text-sm">Real-time status updates</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Filter Buttons -->
+                            <div class="flex gap-2">
+                                <button 
+                                    data-filter="all"
+                                    onclick="filterCrew('all')"
+                                    class="text-xs px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors active bg-white/10"
+                                >
+                                    All
+                                </button>
+                                <button 
+                                    data-filter="online"
+                                    onclick="filterCrew('online')"
+                                    class="text-xs px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors"
+                                >
+                                    Online
+                                </button>
+                                <button 
+                                    data-filter="high-stress"
+                                    onclick="filterCrew('high-stress')"
+                                    class="text-xs px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors"
+                                >
+                                    High Stress
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="crewLoadingState" class="py-12 text-center">
+                        <div class="loader mx-auto mb-4"></div>
+                        <p class="text-gray-400">Loading crew data...</p>
+                    </div>
+
+                    <!-- Crew Grid -->
+                    <div id="crewGrid" class="grid sm:grid-cols-2 gap-4">
+                        <!-- Crew cards will be inserted here dynamically -->
+                    </div>
+                </div>
+
+                <!-- Privacy Notice -->
+                <div class="mt-4 p-4 rounded-lg bg-cyan-500/5 border border-cyan-500/20">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <h4 class="font-semibold text-cyan-400 text-sm">Privacy First</h4>
+                            <p class="text-gray-400 text-sm mt-1">
+                                Only stress levels (Low/Medium/High) are shared with the crew. Individual health metrics, sleep data, and personal details remain private.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts Panel (1 column) -->
+            <div class="space-y-6">
+                
+                <!-- Alerts Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="font-orbitron font-bold text-lg">Active Alerts</h2>
+                                <p class="text-gray-400 text-sm">Crew members needing support</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alerts List -->
+                    <div id="alertsList" class="space-y-3">
+                        <!-- Alerts will be inserted here dynamically -->
+                    </div>
+
+                    <!-- No Alerts Message -->
+                    <div id="noAlertsMessage" class="text-center py-8">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/10 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-semibold text-green-400">All Clear</h3>
+                        <p class="text-gray-500 text-sm mt-1">No active alerts. Everyone is doing well!</p>
+                    </div>
+                </div>
+
+                <!-- High Stress Indicator -->
+                <div id="highStressIndicator" class="card border-red-500/50 hidden">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center animate-pulse">
+                            <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-red-400">Attention Required</h3>
+                            <p class="text-sm text-gray-400">One or more crew members are experiencing high stress levels.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="font-orbitron font-bold text-lg">Quick Actions</h2>
+                    </div>
+                    <div class="space-y-3">
+                        <a href="index.html" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                            <div class="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium">Check Your Stress</div>
+                                <div class="text-xs text-gray-500">Run a quick analysis</div>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+
+                        <a href="games.html" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                            <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium">Relaxation Games</div>
+                                <div class="text-xs text-gray-500">De-stress with mini-games</div>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+
+                        <button onclick="openChatbot()" class="w-full flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-left">
+                            <div class="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium">Talk to ASTRA</div>
+                                <div class="text-xs text-gray-500">Get emotional support</div>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sync Status Card -->
+                <div class="card bg-gradient-to-br from-purple-500/10 to-cyan-500/10">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-purple-400">Connected Mode</h3>
+                            <p class="text-xs text-gray-400">Real-time sync active</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        ASTRA is synchronized with the crew network. All stress updates and alerts are shared in real-time.
+                    </p>
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                        <span>Last sync: Just now</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ASTRA Chatbot Widget -->
+    <div id="chatbotWidget" class="fixed bottom-6 right-6 z-50">
+        <!-- Chat Bubble Button -->
+        <button 
+            id="chatbotToggle" 
+            onclick="toggleChatbot()"
+            class="w-16 h-16 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 flex items-center justify-center shadow-lg glow-cyan hover:scale-110 transition-transform"
+        >
+            <span class="font-orbitron font-bold text-xl">A</span>
+        </button>
+
+        <!-- Chat Window -->
+        <div id="chatWindow" class="hidden absolute bottom-20 right-0 w-80 sm:w-96 bg-space-dark border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+            <!-- Chat Header -->
+            <div class="bg-gradient-to-r from-cyan-500/20 to-purple-600/20 p-4 border-b border-white/10">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 flex items-center justify-center">
+                            <span class="font-orbitron font-bold">A</span>
+                        </div>
+                        <div>
+                            <h3 class="font-orbitron font-bold">ASTRA</h3>
+                            <p class="text-xs text-green-400 flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                                Online
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="toggleChatbot()" class="text-gray-400 hover:text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="chatMessages" class="h-80 overflow-y-auto p-4 space-y-4">
+                <div class="chat-message bot">
+                    <div class="message-bubble">
+                        Hello, Astronaut! I'm ASTRA, your AI wellness companion. How can I support you today? 🚀
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="p-4 border-t border-white/10">
+                <form id="chatForm" class="flex gap-2">
+                    <input 
+                        type="text" 
+                        id="chatInput" 
+                        placeholder="Type a message..." 
+                        class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyan-500/50"
+                    >
+                    <button type="submit" class="btn-primary px-4 py-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-space-dark border border-white/10 rounded-lg p-4 shadow-lg flex items-center gap-3 max-w-sm">
+            <div id="toastIcon" class="w-8 h-8 rounded-full flex items-center justify-center"></div>
+            <div>
+                <p id="toastTitle" class="font-bold text-sm"></p>
+                <p id="toastMessage" class="text-gray-400 text-xs"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+    <!-- App Scripts -->
+    <script src="js/firebase.js"></script>
+    <script src="js/crew.js"></script>
+    <script src="js/chatbot.js"></script>
+
+    <!-- Mobile Menu Toggle -->
+    <script>
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>

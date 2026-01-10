@@ -1,0 +1,19 @@
+ASTRA/
+│
+├── index.html          # Home - Stress Detection
+├── crew.html           # Crew Dashboard
+├── games.html          # Stress Relief Games
+├── login.html          # Login Page
+│
+├── css/
+│   └── styles.css      # All custom styles + animations
+│
+├── js/
+│   ├── firebase.js     # Firebase config + auth + database
+│   ├── app.js          # Stress detection + recommendations
+│   ├── crew.js         # Crew monitoring + alerts
+│   ├── games.js        # Mini-games
+│   └── chatbot.js      # ASTRA AI (Gemini API)
+│
+└── assets/
+    └── logo.svg        # ASTRA logo (optional)

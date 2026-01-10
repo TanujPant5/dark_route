@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASTRA - AI Astronaut Wellness Companion</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts - Orbitron (Space Theme) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        space: {
+                            dark: '#0a0a0f',
+                            deeper: '#05050a',
+                            purple: '#6366f1',
+                            cyan: '#22d3ee',
+                            pink: '#ec4899'
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'monospace'],
+                        inter: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-space-dark min-h-screen font-inter text-white overflow-x-hidden">
+    
+    <!-- Stars Background -->
+    <div class="stars-container fixed inset-0 pointer-events-none z-0">
+        <div id="stars"></div>
+        <div id="stars2"></div>
+        <div id="stars3"></div>
+    </div>
+
+    <!-- Floating Planets (Decorative) -->
+    <div class="fixed top-20 right-10 w-32 h-32 rounded-full bg-gradient-to-br from-purple-600/20 to-pink-600/20 blur-xl pointer-events-none"></div>
+    <div class="fixed bottom-40 left-5 w-48 h-48 rounded-full bg-gradient-to-br from-cyan-600/10 to-blue-600/10 blur-2xl pointer-events-none"></div>
+
+    <!-- Navigation -->
+    <nav class="relative z-50 border-b border-white/10 backdrop-blur-md bg-space-dark/50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <a href="index.html" class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 flex items-center justify-center glow-cyan">
+                        <span class="font-orbitron font-bold text-lg">A</span>
+                    </div>
+                    <span class="font-orbitron font-bold text-xl tracking-wider">ASTRA</span>
+                </a>
+
+                <!-- Nav Links -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="index.html" class="nav-link active">Stress Check</a>
+                    <a href="crew.html" class="nav-link">Crew Status</a>
+                    <a href="games.html" class="nav-link">Relaxation</a>
+                </div>
+
+                <!-- User Profile -->
+                <div id="userSection" class="flex items-center gap-4">
+                    <div id="userLoggedOut">
+                        <a href="login.html" class="btn-primary text-sm px-4 py-2">Login</a>
+                    </div>
+                    <div id="userLoggedIn" class="hidden flex items-center gap-3">
+                        <span id="userName" class="text-sm text-gray-300"></span>
+                        <div class="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center cursor-pointer">
+                            <span id="userInitial" class="font-bold text-sm">A</span>
+                        </div>
+                        <button onclick="logout()" class="text-gray-400 hover:text-white text-sm">Logout</button>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuBtn" class="md:hidden text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobileMenu" class="hidden md:hidden mt-4 pb-4 border-t border-white/10 pt-4">
+                <div class="flex flex-col gap-4">
+                    <a href="index.html" class="nav-link active">Stress Check</a>
+                    <a href="crew.html" class="nav-link">Crew Status</a>
+                    <a href="games.html" class="nav-link">Relaxation</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="relative z-10 max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- Hero Section -->
+        <section class="text-center mb-12">
+            <h1 class="font-orbitron text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Welcome, Astronaut
+            </h1>
+            <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+                ASTRA monitors your well-being and provides real-time support during your mission. Let's check your current stress levels.
+            </p>
+        </section>
+
+        <!-- Main Grid -->
+        <div class="grid lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column - Stress Input Form -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Stress Detection Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="font-orbitron font-bold text-lg">Stress Detection</h2>
+                                <p class="text-gray-400 text-sm">Input your current metrics</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="stressForm" class="space-y-6">
+                        
+                        <!-- Sleep Hours -->
+                        <div class="input-group">
+                            <label class="input-label">
+                                <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                                </svg>
+                                Sleep Hours (Last 24h)
+                            </label>
+                            <input 
+                                type="number" 
+                                id="sleepHours" 
+                                min="0" 
+                                max="24" 
+                                step="0.5"
+                                value="7"
+                                class="input-field"
+                                required
+                            >
+                            <div class="input-hint">Recommended: 7-9 hours</div>
+                        </div>
+
+                        <!-- Mood Level Slider -->
+                        <div class="input-group">
+                            <label class="input-label">
+                                <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Mood Level: <span id="moodValue" class="text-cyan-400 font-bold">5</span>/10
+                            </label>
+                            <div class="slider-container">
+                                <input 
+                                    type="range" 
+                                    id="moodLevel" 
+                                    min="1" 
+                                    max="10" 
+                                    value="5"
+                                    class="slider"
+                                >
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>😔 Low</span>
+                                    <span>😐 Neutral</span>
+                                    <span>😊 Great</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Heart Rate -->
+                        <div class="input-group">
+                            <label class="input-label">
+                                <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                </svg>
+                                Heart Rate (BPM)
+                            </label>
+                            <div class="flex gap-3">
+                                <input 
+                                    type="number" 
+                                    id="heartRate" 
+                                    min="40" 
+                                    max="200" 
+                                    value="72"
+                                    class="input-field flex-1"
+                                    required
+                                >
+                                <button 
+                                    type="button" 
+                                    onclick="simulateHeartRate()"
+                                    class="btn-secondary px-4"
+                                >
+                                    Simulate
+                                </button>
+                            </div>
+                            <div class="input-hint">Normal resting: 60-100 BPM</div>
+                        </div>
+
+                        <!-- Physical Activity -->
+                        <div class="input-group">
+                            <label class="input-label">
+                                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                                Physical Activity Today
+                            </label>
+                            <select id="activityLevel" class="input-field">
+                                <option value="none">No Exercise</option>
+                                <option value="light" selected>Light (15-30 min)</option>
+                                <option value="moderate">Moderate (30-60 min)</option>
+                                <option value="intense">Intense (60+ min)</option>
+                            </select>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn-primary w-full py-4 text-lg font-orbitron">
+                            <span id="analyzeText">Analyze Stress Level</span>
+                            <div id="analyzeLoader" class="hidden loader"></div>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Recommendations Section -->
+                <div id="recommendationsSection" class="card hidden">
+                    <div class="card-header">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="font-orbitron font-bold text-lg">ASTRA Recommendations</h2>
+                                <p class="text-gray-400 text-sm">Personalized support for you</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="recommendationsList" class="space-y-4">
+                        <!-- Recommendations will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Results & Status -->
+            <div class="space-y-6">
+                
+                <!-- Stress Level Result -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="font-orbitron font-bold text-lg text-center">Current Stress Level</h2>
+                    </div>
+                    
+                    <!-- Stress Gauge -->
+                    <div class="flex flex-col items-center">
+                        <div class="stress-gauge relative w-48 h-48 mb-4">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                <!-- Background Circle -->
+                                <circle 
+                                    cx="50" cy="50" r="40" 
+                                    fill="none" 
+                                    stroke="#1e1e2e" 
+                                    stroke-width="10"
+                                />
+                                <!-- Progress Circle -->
+                                <circle 
+                                    id="stressCircle"
+                                    cx="50" cy="50" r="40" 
+                                    fill="none" 
+                                    stroke="url(#gaugeGradient)" 
+                                    stroke-width="10"
+                                    stroke-linecap="round"
+                                    stroke-dasharray="251.2"
+                                    stroke-dashoffset="251.2"
+                                    class="transition-all duration-1000 ease-out"
+                                />
+                                <defs>
+                                    <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" id="gradientStart" stop-color="#22d3ee"/>
+                                        <stop offset="100%" id="gradientEnd" stop-color="#6366f1"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span id="stressPercentage" class="font-orbitron text-4xl font-bold">--</span>
+                                <span class="text-gray-400 text-sm">Stress Score</span>
+                            </div>
+                        </div>
+
+                        <!-- Stress Level Label -->
+                        <div id="stressLevelBadge" class="stress-badge stress-badge-low">
+                            <span id="stressLevelText">Awaiting Data</span>
+                        </div>
+
+                        <!-- Stress Explanation -->
+                        <p id="stressExplanation" class="text-gray-400 text-sm text-center mt-4">
+                            Enter your metrics above and click "Analyze" to check your stress level.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="font-orbitron font-bold text-lg">Today's Summary</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-cyan-500/20 text-cyan-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="stat-value" id="lastCheckTime">--:--</div>
+                            <div class="stat-label">Last Check</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-purple-500/20 text-purple-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="stat-value" id="checksToday">0</div>
+                            <div class="stat-label">Checks Today</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-green-500/20 text-green-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                </svg>
+                            </div>
+                            <div class="stat-value" id="avgStress">--</div>
+                            <div class="stat-label">Avg Stress</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-pink-500/20 text-pink-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </div>
+                            <div class="stat-value" id="crewOnline">--</div>
+                            <div class="stat-label">Crew Online</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crew Alert Preview -->
+                <div id="crewAlertPreview" class="card border-yellow-500/50 hidden">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center animate-pulse">
+                            <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-yellow-400">Crew Alert</h3>
+                            <p id="crewAlertText" class="text-sm text-gray-300">A crew member needs support</p>
+                        </div>
+                        <a href="crew.html" class="text-cyan-400 text-sm hover:underline">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- High Stress Alert Modal -->
+    <div id="highStressModal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeHighStressModal()"></div>
+        <div class="modal-content border-red-500/50">
+            <div class="text-center">
+                <div class="w-20 h-20 mx-auto rounded-full bg-red-500/20 flex items-center justify-center mb-4 animate-pulse">
+                    <svg class="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <h2 class="font-orbitron text-2xl font-bold text-red-400 mb-2">High Stress Detected</h2>
+                <p class="text-gray-300 mb-6">ASTRA has detected elevated stress levels. Your crew has been notified. Please take a moment to relax.</p>
+                <div class="flex gap-4 justify-center">
+                    <a href="games.html" class="btn-primary">
+                        Play Relaxation Game
+                    </a>
+                    <button onclick="openChatbot()" class="btn-secondary">
+                        Talk to ASTRA
+                    </button>
+                </div>
+                <button onclick="closeHighStressModal()" class="mt-4 text-gray-400 hover:text-white text-sm">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASTRA Chatbot Widget -->
+    <div id="chatbotWidget" class="fixed bottom-6 right-6 z-50">
+        <!-- Chat Bubble Button -->
+        <button 
+            id="chatbotToggle" 
+            onclick="toggleChatbot()"
+            class="w-16 h-16 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 flex items-center justify-center shadow-lg glow-cyan hover:scale-110 transition-transform"
+        >
+            <span class="font-orbitron font-bold text-xl">A</span>
+        </button>
+
+        <!-- Chat Window -->
+        <div id="chatWindow" class="hidden absolute bottom-20 right-0 w-80 sm:w-96 bg-space-dark border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+            <!-- Chat Header -->
+            <div class="bg-gradient-to-r from-cyan-500/20 to-purple-600/20 p-4 border-b border-white/10">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 flex items-center justify-center">
+                            <span class="font-orbitron font-bold">A</span>
+                        </div>
+                        <div>
+                            <h3 class="font-orbitron font-bold">ASTRA</h3>
+                            <p class="text-xs text-green-400 flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                                Online
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="toggleChatbot()" class="text-gray-400 hover:text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="chatMessages" class="h-80 overflow-y-auto p-4 space-y-4">
+                <div class="chat-message bot">
+                    <div class="message-bubble">
+                        Hello, Astronaut! I'm ASTRA, your AI wellness companion. How can I support you today? 🚀
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="p-4 border-t border-white/10">
+                <form id="chatForm" class="flex gap-2">
+                    <input 
+                        type="text" 
+                        id="chatInput" 
+                        placeholder="Type a message..." 
+                        class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyan-500/50"
+                    >
+                    <button type="submit" class="btn-primary px-4 py-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-space-dark border border-white/10 rounded-lg p-4 shadow-lg flex items-center gap-3 max-w-sm">
+            <div id="toastIcon" class="w-8 h-8 rounded-full flex items-center justify-center"></div>
+            <div>
+                <p id="toastTitle" class="font-bold text-sm"></p>
+                <p id="toastMessage" class="text-gray-400 text-xs"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+    <!-- App Scripts -->
+    <script src="js/firebase.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/chatbot.js"></script>
+
+    <!-- Mobile Menu Toggle -->
+    <script>
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>
