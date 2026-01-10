@@ -8,9 +8,13 @@
 // -------------------- 
 
 // IMPORTANT: Replace with your actual Gemini API key
-// For production, this should be handled server-side
-const GEMINI_API_KEY = 'AIzaSyDnosKWIwNr9xDkD5RCCwkOln5ZkMGsjXQ';
+const GEMINI_API_KEY = 'AIzaSyDnosKWIwNr9xDkD5RCCwkOln5ZkMGsjXQ'; // <-- PUT YOUR KEY HERE
+
+// Use the correct Gemini API endpoint
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+
+// Debug mode - set to true to see console logs
+const DEBUG_MODE = true;
 
 // ASTRA's personality and context
 const ASTRA_SYSTEM_PROMPT = `You are ASTRA (Artificial Space Therapeutic Response Assistant), an AI companion designed to support astronauts' psychological well-being during space missions.
@@ -56,12 +60,25 @@ let conversationHistory = [];
 let isTyping = false;
 
 // -------------------- 
+// Debug Logger
+// -------------------- 
+function debugLog(message, data = null) {
+    if (DEBUG_MODE) {
+        console.log(`[ASTRA Chatbot] ${message}`);
+        if (data) {
+            console.log(data);
+        }
+    }
+}
+
+// -------------------- 
 // Event Listeners
 // -------------------- 
 
 // Chat form submission
 if (chatForm) {
     chatForm.addEventListener('submit', handleChatSubmit);
+    debugLog('Chat form listener attached');
 }
 
 // Enter key to send (but allow Shift+Enter for new line)
@@ -86,7 +103,7 @@ function toggleChatbot() {
             if (chatInput) chatInput.focus();
             
             // Load chat history on first open
-            if (conversationHistory.length === 0) {
+            if (conversationHistory.length === 0 && typeof getChatHistory === 'function') {
                 loadChatHistory();
             }
         } else {
@@ -111,16 +128,20 @@ async function handleChatSubmit(e) {
     const message = chatInput.value.trim();
     if (!message || isTyping) return;
     
+    debugLog('User message:', message);
+    
     // Clear input
     chatInput.value = '';
     
     // Add user message to UI
     addMessage(message, 'user');
     
-    // Save user message to Firebase
-    saveChatMessage(message, 'user');
+    // Save user message to Firebase (if function exists)
+    if (typeof saveChatMessage === 'function') {
+        saveChatMessage(message, 'user');
+    }
     
-    // Add to conversation history
+    // Add to conversation history for context
     conversationHistory.push({
         role: 'user',
         parts: [{ text: message }]
@@ -132,14 +153,18 @@ async function handleChatSubmit(e) {
     // Get AI response
     const response = await getAstraResponse(message);
     
+    debugLog('ASTRA response:', response);
+    
     // Hide typing indicator
     hideTypingIndicator();
     
     // Add ASTRA's response to UI
     addMessage(response, 'bot');
     
-    // Save ASTRA's response to Firebase
-    saveChatMessage(response, 'astra');
+    // Save ASTRA's response to Firebase (if function exists)
+    if (typeof saveChatMessage === 'function') {
+        saveChatMessage(response, 'astra');
+    }
     
     // Add to conversation history
     conversationHistory.push({
@@ -205,16 +230,36 @@ function hideTypingIndicator() {
 // Get ASTRA Response (Gemini API)
 // -------------------- 
 async function getAstraResponse(userMessage) {
+    // Check if API key is configured
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_API_KEY_HERE' || GEMINI_API_KEY.length < 10) {
+        debugLog('❌ API key not configured properly!');
+        console.error('ASTRA: Gemini API key is not set. Please add your API key in chatbot.js');
+        return getFallbackResponse(userMessage);
+    }
+    
+    debugLog('🔑 API Key found (first 10 chars):', GEMINI_API_KEY.substring(0, 10) + '...');
+    
     try {
-        // Check if API key is configured
-        if (GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
-            // Use fallback responses if no API key
-            return getFallbackResponse(userMessage);
-        }
-        
-        // Prepare the request
+        // Build the request body
         const requestBody = {
             contents: [
+                {
+                    role: 'user',
+                    parts: [{ text: ASTRA_SYSTEM_PROMPT + "\n\nNow respond to this message from an astronaut: " + userMessage }]
+                }
+            ],
+            generationConfig: {
+                temperature: 0.7,
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: 256,
+            }
+        };
+        
+        // If we have conversation history, use multi-turn format
+        if (conversationHistory.length > 0) {
+            requestBody.contents = [
+                // System context as first user message
                 {
                     role: 'user',
                     parts: [{ text: ASTRA_SYSTEM_PROMPT }]
@@ -223,37 +268,18 @@ async function getAstraResponse(userMessage) {
                     role: 'model',
                     parts: [{ text: 'Understood. I am ASTRA, ready to support astronauts with empathy and care. How can I help you today? 🚀' }]
                 },
-                ...conversationHistory,
+                // Previous conversation
+                ...conversationHistory.slice(-10), // Keep last 10 messages for context
+                // Current message
                 {
                     role: 'user',
                     parts: [{ text: userMessage }]
                 }
-            ],
-            generationConfig: {
-                temperature: 0.7,
-                topK: 40,
-                topP: 0.95,
-                maxOutputTokens: 256,
-            },
-            safetySettings: [
-                {
-                    category: 'HARM_CATEGORY_HARASSMENT',
-                    threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-                },
-                {
-                    category: 'HARM_CATEGORY_HATE_SPEECH',
-                    threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-                },
-                {
-                    category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-                    threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-                },
-                {
-                    category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                    threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-                }
-            ]
-        };
+            ];
+        }
+        
+        debugLog('📤 Sending request to Gemini API...');
+        debugLog('Request URL:', `${GEMINI_API_URL}?key=${GEMINI_API_KEY.substring(0, 10)}...`);
         
         const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
@@ -263,22 +289,51 @@ async function getAstraResponse(userMessage) {
             body: JSON.stringify(requestBody)
         });
         
+        debugLog('📥 Response status:', response.status);
+        
         if (!response.ok) {
-            throw new Error(`API request failed: ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            debugLog('❌ API Error Response:', errorData);
+            
+            // Handle specific error codes
+            if (response.status === 400) {
+                console.error('ASTRA: Bad request - check API format');
+            } else if (response.status === 401 || response.status === 403) {
+                console.error('ASTRA: Invalid API key or unauthorized');
+            } else if (response.status === 429) {
+                console.error('ASTRA: Rate limit exceeded');
+            } else if (response.status === 500) {
+                console.error('ASTRA: Gemini API server error');
+            }
+            
+            throw new Error(`API request failed: ${response.status} - ${JSON.stringify(errorData)}`);
         }
         
         const data = await response.json();
+        debugLog('✅ API Response:', data);
         
         // Extract the response text
         if (data.candidates && data.candidates[0] && data.candidates[0].content) {
             const text = data.candidates[0].content.parts[0].text;
+            debugLog('💬 Extracted response:', text);
             return text;
+        } else if (data.candidates && data.candidates[0] && data.candidates[0].finishReason === 'SAFETY') {
+            debugLog('⚠️ Response blocked by safety filters');
+            return "I want to help, but I need to be careful with my response. Could you rephrase that? I'm here to support you. 💙";
         } else {
+            debugLog('❌ Unexpected response format:', data);
             throw new Error('Invalid API response format');
         }
         
     } catch (error) {
-        console.error('Error getting ASTRA response:', error);
+        console.error('ASTRA Chatbot Error:', error);
+        debugLog('❌ Error details:', error.message);
+        
+        // Check if it's a network/CORS error
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            console.error('ASTRA: Network error - this might be a CORS issue. Consider using a backend proxy.');
+        }
+        
         return getFallbackResponse(userMessage);
     }
 }
@@ -287,6 +342,8 @@ async function getAstraResponse(userMessage) {
 // Fallback Responses (When API unavailable)
 // -------------------- 
 function getFallbackResponse(userMessage) {
+    debugLog('⚠️ Using fallback response');
+    
     const lowerMessage = userMessage.toLowerCase();
     
     // Stress-related responses
@@ -302,7 +359,7 @@ function getFallbackResponse(userMessage) {
     // Loneliness/homesickness
     if (lowerMessage.includes('lonely') || lowerMessage.includes('miss') || lowerMessage.includes('home') || lowerMessage.includes('alone')) {
         const lonelyResponses = [
-            "Missing Earth and loved ones is one of the hardest parts of space travel. Your feelings matter. Would you like to share a favorite memory from home? Sometimes it helps to connect with those feelings. 🌍",
+            "Missing Earth and loved ones is one of the hardest parts of space travel. Your feelings matter. Would you like to share a favorite memory from home? 🌍",
             "You're millions of miles from home, but you're not alone. Your crew is with you, and I'm always here. What's something you're looking forward to when you return?",
             "The distance can feel immense, but your connections remain. Remember, every star you see has its own story of connection across vast distances. 💫"
         ];
@@ -330,7 +387,7 @@ function getFallbackResponse(userMessage) {
     }
     
     // Greetings
-    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey') || lowerMessage.includes('how are you')) {
+    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey') || lowerMessage.match(/^hi$/i)) {
         const greetingResponses = [
             "Hello, astronaut! It's great to hear from you. How are you feeling today? I'm here to support you. 🚀",
             "Hey there! I hope your mission is going well. Is there anything on your mind you'd like to talk about?",
@@ -380,6 +437,11 @@ function getFallbackResponse(userMessage) {
 // -------------------- 
 async function loadChatHistory() {
     try {
+        if (typeof getChatHistory !== 'function') {
+            debugLog('getChatHistory function not available');
+            return;
+        }
+        
         const messages = await getChatHistory(10);
         
         if (messages && messages.length > 0) {
@@ -399,6 +461,8 @@ async function loadChatHistory() {
                     parts: [{ text: msg.message }]
                 });
             });
+            
+            debugLog('Loaded chat history:', messages.length, 'messages');
         }
     } catch (error) {
         console.error('Error loading chat history:', error);
@@ -416,42 +480,6 @@ function sendQuickResponse(text) {
 }
 
 // -------------------- 
-// Context-Aware Suggestions
-// -------------------- 
-function getContextSuggestions(stressLevel) {
-    const suggestions = {
-        high: [
-            "I'm feeling overwhelmed",
-            "Help me calm down",
-            "I need to talk"
-        ],
-        medium: [
-            "I'm a bit stressed",
-            "Any relaxation tips?",
-            "How can I improve my mood?"
-        ],
-        low: [
-            "Just checking in!",
-            "Share something inspiring",
-            "What can I do to stay positive?"
-        ]
-    };
-    
-    return suggestions[stressLevel] || suggestions.low;
-}
-
-// -------------------- 
-// Notification for High Stress
-// -------------------- 
-function sendStressNotification(stressLevel, stressScore) {
-    if (stressLevel === 'high' && isChatOpen) {
-        const notification = `I noticed your stress level is high (${stressScore}%). Remember, I'm here for you. Would you like to talk about what's causing the stress, or shall we try a calming exercise together? 💙`;
-        addMessage(notification, 'bot');
-        saveChatMessage(notification, 'astra');
-    }
-}
-
-// -------------------- 
 // Clear Chat
 // -------------------- 
 function clearChat() {
@@ -465,13 +493,57 @@ function clearChat() {
         `;
     }
     conversationHistory = [];
+    debugLog('Chat cleared');
+}
+
+// -------------------- 
+// Test API Connection
+// -------------------- 
+async function testGeminiAPI() {
+    console.log('🧪 Testing Gemini API connection...');
+    
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_API_KEY_HERE') {
+        console.error('❌ API key not set! Please add your Gemini API key in chatbot.js');
+        return false;
+    }
+    
+    try {
+        const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: 'Say "API Connected Successfully!" in exactly those words.' }]
+                }]
+            })
+        });
+        
+        console.log('Response status:', response.status);
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ API Response:', data);
+            console.log('✅ Gemini API is working!');
+            return true;
+        } else {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('❌ API Error:', response.status, errorData);
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Connection error:', error);
+        return false;
+    }
 }
 
 // -------------------- 
 // Initialize
 // -------------------- 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('💬 ASTRA Chatbot initialized');
+    debugLog('💬 ASTRA Chatbot initialized');
+    debugLog('API Key configured:', GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_API_KEY_HERE' ? 'Yes' : 'No');
     
     // Add subtle animation to chat toggle
     if (chatbotToggle) {
@@ -492,4 +564,4 @@ window.toggleChatbot = toggleChatbot;
 window.openChatbot = openChatbot;
 window.sendQuickResponse = sendQuickResponse;
 window.clearChat = clearChat;
-window.sendStressNotification = sendStressNotification;
+window.testGeminiAPI = testGeminiAPI; // For debugging
