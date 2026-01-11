@@ -1,3 +1,14 @@
+// -------------------- 
+// Translation Helper
+// -------------------- 
+// Safely calls the global getText function from translations.js
+function t(key, defaultText) {
+    if (typeof getText === 'function') {
+        return getText(key) || defaultText;
+    }
+    return defaultText;
+}
+
 const stressForm = document.getElementById('stressForm');
 const sleepHoursInput = document.getElementById('sleepHours');
 const moodLevelInput = document.getElementById('moodLevel');
@@ -78,57 +89,65 @@ async function handleStressCheck(e) {
         analyzeLoader.classList.add('hidden');
     }
     
-    showToast('success', 'Analysis Complete', `Stress level: ${capitalizeFirst(stressResult.level)}`);
+    // Translate level for toast
+    const levelKey = `stress_${stressResult.level}`; // e.g., stress_low
+    const translatedLevel = t(levelKey, capitalizeFirst(stressResult.level));
+    
+    showToast('success', t('toast_analysis_complete', 'Analysis Complete'), `${t('toast_stress_level', 'Stress level')}: ${translatedLevel}`);
 }
 
 function calculateStressLevel(sleepHours, moodLevel, heartRate, activityLevel) {
     let stressScore = 0;
     let factors = [];
     
+    // Sleep Factors
     if (sleepHours < 4) {
         stressScore += 30;
-        factors.push('severely inadequate sleep');
+        factors.push(t('factor_sleep_severe', 'severely inadequate sleep'));
     } else if (sleepHours < 6) {
         stressScore += 20;
-        factors.push('insufficient sleep');
+        factors.push(t('factor_sleep_low', 'insufficient sleep'));
     } else if (sleepHours < 7) {
         stressScore += 10;
-        factors.push('slightly low sleep');
+        factors.push(t('factor_sleep_mild', 'slightly low sleep'));
     } else if (sleepHours > 10) {
         stressScore += 10;
-        factors.push('excessive sleep (possible fatigue indicator)');
+        factors.push(t('factor_sleep_excess', 'excessive sleep'));
     }
     
+    // Mood Factors
     if (moodLevel <= 2) {
         stressScore += 35;
-        factors.push('very low mood');
+        factors.push(t('factor_mood_very_low', 'very low mood'));
     } else if (moodLevel <= 4) {
         stressScore += 25;
-        factors.push('low mood');
+        factors.push(t('factor_mood_low', 'low mood'));
     } else if (moodLevel <= 5) {
         stressScore += 15;
-        factors.push('neutral mood');
+        factors.push(t('factor_mood_neutral', 'neutral mood'));
     } else if (moodLevel <= 6) {
         stressScore += 5;
     }
     
+    // Heart Rate Factors
     if (heartRate < 50) {
         stressScore += 15;
-        factors.push('unusually low heart rate');
+        factors.push(t('factor_hr_low', 'unusually low heart rate'));
     } else if (heartRate > 100) {
         stressScore += 25;
-        factors.push('elevated heart rate');
+        factors.push(t('factor_hr_high', 'elevated heart rate'));
     } else if (heartRate > 90) {
         stressScore += 15;
-        factors.push('slightly elevated heart rate');
+        factors.push(t('factor_hr_mild', 'slightly elevated heart rate'));
     } else if (heartRate > 80) {
         stressScore += 5;
     }
     
+    // Activity Factors
     switch (activityLevel) {
         case 'none':
             stressScore += 10;
-            factors.push('no physical activity');
+            factors.push(t('factor_activity_none', 'no physical activity'));
             break;
         case 'light':
             break;
@@ -146,20 +165,24 @@ function calculateStressLevel(sleepHours, moodLevel, heartRate, activityLevel) {
     
     if (stressScore <= 25) {
         level = 'low';
-        explanation = 'Your vitals and well-being indicators are within optimal range. Keep maintaining your healthy routines!';
+        explanation = t('expl_low', 'Your vitals and well-being indicators are within optimal range. Keep maintaining your healthy routines!');
     } else if (stressScore <= 55) {
         level = 'medium';
         if (factors.length > 0) {
-            explanation = `Moderate stress detected. Contributing factors: ${factors.slice(0, 2).join(', ')}. Consider taking short breaks.`;
+            const factorString = factors.slice(0, 2).join(', ');
+            explanation = t('expl_med_factors', 'Moderate stress detected. Contributing factors: {factors}. Consider taking short breaks.')
+                .replace('{factors}', factorString);
         } else {
-            explanation = 'Moderate stress levels detected. Consider incorporating relaxation activities.';
+            explanation = t('expl_med', 'Moderate stress levels detected. Consider incorporating relaxation activities.');
         }
     } else {
         level = 'high';
         if (factors.length > 0) {
-            explanation = `High stress detected! Key concerns: ${factors.slice(0, 3).join(', ')}. Immediate attention recommended.`;
+            const factorString = factors.slice(0, 3).join(', ');
+            explanation = t('expl_high_factors', 'High stress detected! Key concerns: {factors}. Immediate attention recommended.')
+                .replace('{factors}', factorString);
         } else {
-            explanation = 'High stress levels detected. Please take immediate steps to relax and consider reaching out for support.';
+            explanation = t('expl_high', 'High stress levels detected. Please take immediate steps to relax and consider reaching out for support.');
         }
     }
     
@@ -208,7 +231,9 @@ function displayStressResult(result) {
     }
     
     if (stressLevelText) {
-        stressLevelText.textContent = `${capitalizeFirst(result.level)} Stress`;
+        const levelText = t(`stress_${result.level}`, capitalizeFirst(result.level));
+        const stressLabel = t('label_stress', 'Stress');
+        stressLevelText.textContent = `${levelText} ${stressLabel}`;
     }
     
     if (stressExplanation) {
@@ -244,18 +269,18 @@ function generateRecommendations(stressResult, sleepHours, moodLevel, heartRate,
         recommendations.push({
             icon: '🫁',
             iconBg: 'bg-cyan-500/20',
-            title: 'Breathing Exercise',
-            description: 'Take 5 minutes for deep breathing. Inhale for 4 seconds, hold for 4, exhale for 6.',
-            action: 'Start Now',
+            title: t('rec_breath_title', 'Breathing Exercise'),
+            description: t('rec_breath_desc', 'Take 5 minutes for deep breathing. Inhale for 4 seconds, hold for 4, exhale for 6.'),
+            action: t('btn_start_now', 'Start Now'),
             link: 'games.html#breathing'
         });
         
         recommendations.push({
             icon: '💬',
             iconBg: 'bg-purple-500/20',
-            title: 'Talk to ASTRA',
-            description: 'Share what\'s on your mind. I\'m here to listen and provide support.',
-            action: 'Open Chat',
+            title: t('rec_chat_title', 'Talk to ASTRA'),
+            description: t('rec_chat_desc', 'Share what\'s on your mind. I\'m here to listen and provide support.'),
+            action: t('btn_open_chat', 'Open Chat'),
             onclick: 'openChatbot()'
         });
     }
@@ -264,9 +289,9 @@ function generateRecommendations(stressResult, sleepHours, moodLevel, heartRate,
         recommendations.push({
             icon: '😴',
             iconBg: 'bg-indigo-500/20',
-            title: 'Rest Reminder',
-            description: `You've had only ${sleepHours} hours of sleep. Consider scheduling a 20-minute power nap.`,
-            action: 'Set Reminder'
+            title: t('rec_rest_title', 'Rest Reminder'),
+            description: t('rec_rest_desc', 'You\'ve had only {hours} hours of sleep. Consider scheduling a 20-minute power nap.').replace('{hours}', sleepHours),
+            action: t('btn_set_reminder', 'Set Reminder')
         });
     }
     
@@ -274,9 +299,9 @@ function generateRecommendations(stressResult, sleepHours, moodLevel, heartRate,
         recommendations.push({
             icon: '🎮',
             iconBg: 'bg-pink-500/20',
-            title: 'Stress-Relief Game',
-            description: 'Play a calming space game to shift your focus and improve your mood.',
-            action: 'Play Now',
+            title: t('rec_game_title', 'Stress-Relief Game'),
+            description: t('rec_game_desc', 'Play a calming space game to shift your focus and improve your mood.'),
+            action: t('btn_play_now', 'Play Now'),
             link: 'games.html'
         });
     }
@@ -285,9 +310,9 @@ function generateRecommendations(stressResult, sleepHours, moodLevel, heartRate,
         recommendations.push({
             icon: '🧘',
             iconBg: 'bg-green-500/20',
-            title: 'Relaxation Exercise',
-            description: 'Your heart rate is elevated. Try progressive muscle relaxation to calm down.',
-            action: 'Learn More'
+            title: t('rec_relax_title', 'Relaxation Exercise'),
+            description: t('rec_relax_desc', 'Your heart rate is elevated. Try progressive muscle relaxation to calm down.'),
+            action: t('btn_learn_more', 'Learn More')
         });
     }
     
@@ -295,9 +320,9 @@ function generateRecommendations(stressResult, sleepHours, moodLevel, heartRate,
         recommendations.push({
             icon: '🏃',
             iconBg: 'bg-orange-500/20',
-            title: 'Physical Activity',
-            description: 'Light exercise can significantly reduce stress. Try 15 minutes of stretching.',
-            action: 'View Exercises'
+            title: t('rec_activity_title', 'Physical Activity'),
+            description: t('rec_activity_desc', 'Light exercise can significantly reduce stress. Try 15 minutes of stretching.'),
+            action: t('btn_view_exercises', 'View Exercises')
         });
     }
     
@@ -305,8 +330,8 @@ function generateRecommendations(stressResult, sleepHours, moodLevel, heartRate,
         recommendations.push({
             icon: '⭐',
             iconBg: 'bg-yellow-500/20',
-            title: 'Great Work!',
-            description: 'Your stress levels are optimal. Keep up your healthy habits!',
+            title: t('rec_great_title', 'Great Work!'),
+            description: t('rec_great_desc', 'Your stress levels are optimal. Keep up your healthy habits!'),
             action: null
         });
     }
@@ -315,9 +340,9 @@ function generateRecommendations(stressResult, sleepHours, moodLevel, heartRate,
         recommendations.push({
             icon: '👥',
             iconBg: 'bg-blue-500/20',
-            title: 'Connect with Crew',
-            description: 'Social connection can help reduce stress. Check in with your crewmates.',
-            action: 'View Crew',
+            title: t('rec_crew_title', 'Connect with Crew'),
+            description: t('rec_crew_desc', 'Social connection can help reduce stress. Check in with your crewmates.'),
+            action: t('btn_view_crew', 'View Crew'),
             link: 'crew.html'
         });
     }
@@ -376,7 +401,8 @@ function updateLocalStats(level) {
     }
     
     if (avgStress) {
-        avgStress.textContent = capitalizeFirst(level);
+        const levelKey = `stress_${level}`;
+        avgStress.textContent = t(levelKey, capitalizeFirst(level));
     }
 }
 
@@ -394,7 +420,8 @@ function simulateHeartRate() {
         }, 500);
     }
     
-    showToast('info', 'Heart Rate Simulated', `${simulatedRate} BPM detected`);
+    const msg = t('toast_hr_simulated_msg', '{rate} BPM detected').replace('{rate}', simulatedRate);
+    showToast('info', t('toast_hr_simulated', 'Heart Rate Simulated'), msg);
 }
 
 function showHighStressModal() {

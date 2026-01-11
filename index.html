@@ -54,22 +54,29 @@
                     <span class="font-orbitron font-bold text-xl tracking-wider">ASTRA</span>
                 </a>
 
-                <div class="hidden md:flex items-center gap-8">
-                    <a href="index.html" class="nav-link active">Stress Check</a>
-                    <a href="crew.html" class="nav-link">Crew Status</a>
-                    <a href="games.html" class="nav-link">Relaxation</a>
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="index.html" class="nav-link active" data-i18n="nav_stress">Stress Check</a>
+                    <a href="crew.html" class="nav-link" data-i18n="nav_crew">Crew Status</a>
+                    <a href="games.html" class="nav-link" data-i18n="nav_relax">Relaxation</a>
+                    
+                    <select id="languageSelector" onchange="changeLanguage(this.value)" class="bg-white/5 border border-white/20 rounded-md text-xs text-gray-300 px-2 py-1 focus:outline-none focus:border-cyan-500 cursor-pointer hover:bg-white/10 transition-colors">
+                        <option value="en">🇺🇸 EN</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="fr">🇫🇷 FR</option>
+                        <option value="hi">🇮🇳 HI</option>
+                    </select>
                 </div>
 
                 <div id="userSection" class="flex items-center gap-4">
                     <div id="userLoggedOut">
-                        <a href="login.html" class="btn-primary text-sm px-4 py-2">Login</a>
+                        <a href="login.html" class="btn-primary text-sm px-4 py-2" data-i18n="nav_login">Login</a>
                     </div>
                     <div id="userLoggedIn" class="hidden flex items-center gap-3">
                         <span id="userName" class="text-sm text-gray-300"></span>
                         <div class="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center cursor-pointer">
                             <span id="userInitial" class="font-bold text-sm">A</span>
                         </div>
-                        <button onclick="logout()" class="text-gray-400 hover:text-white text-sm">Logout</button>
+                        <button onclick="logout()" class="text-gray-400 hover:text-white text-sm" data-i18n="nav_logout">Logout</button>
                     </div>
                 </div>
 
@@ -82,9 +89,15 @@
 
             <div id="mobileMenu" class="hidden md:hidden mt-4 pb-4 border-t border-white/10 pt-4">
                 <div class="flex flex-col gap-4">
-                    <a href="index.html" class="nav-link active">Stress Check</a>
-                    <a href="crew.html" class="nav-link">Crew Status</a>
-                    <a href="games.html" class="nav-link">Relaxation</a>
+                    <a href="index.html" class="nav-link active" data-i18n="nav_stress">Stress Check</a>
+                    <a href="crew.html" class="nav-link" data-i18n="nav_crew">Crew Status</a>
+                    <a href="games.html" class="nav-link" data-i18n="nav_relax">Relaxation</a>
+                    <select onchange="changeLanguage(this.value)" class="bg-white/5 border border-white/20 rounded-md text-sm text-gray-300 px-3 py-2 w-full focus:outline-none focus:border-cyan-500">
+                        <option value="en">🇺🇸 English</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="hi">🇮🇳 Hindi</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -93,10 +106,10 @@
     <main class="relative z-10 max-w-7xl mx-auto px-4 py-8">
         
         <section class="text-center mb-12">
-            <h1 class="font-orbitron text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <h1 class="font-orbitron text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent" data-i18n="welcome_title">
                 Welcome, Astronaut
             </h1>
-            <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+            <p class="text-gray-400 text-lg max-w-2xl mx-auto" data-i18n="welcome_subtitle">
                 ASTRA monitors your well-being and provides real-time support during your mission. Let's check your current stress levels.
             </p>
         </section>
@@ -114,8 +127,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="font-orbitron font-bold text-lg">Stress Detection</h2>
-                                <p class="text-gray-400 text-sm">Input your current metrics</p>
+                                <h2 class="font-orbitron font-bold text-lg" data-i18n="stress_card_title">Stress Detection</h2>
+                                <p class="text-gray-400 text-sm" data-i18n="stress_card_subtitle">Input your current metrics</p>
                             </div>
                         </div>
                     </div>
@@ -127,7 +140,7 @@
                                 <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
                                 </svg>
-                                Sleep Hours (Last 24h)
+                                <span data-i18n="label_sleep">Sleep Hours (Last 24h)</span>
                             </label>
                             <input 
                                 type="number" 
@@ -139,7 +152,7 @@
                                 class="input-field"
                                 required
                             >
-                            <div class="input-hint">Recommended: 7-9 hours</div>
+                            <div class="input-hint" data-i18n="hint_sleep">Recommended: 7-9 hours</div>
                         </div>
 
                         <div class="input-group">
@@ -147,7 +160,7 @@
                                 <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                Mood Level: <span id="moodValue" class="text-cyan-400 font-bold">5</span>/10
+                                <span data-i18n="label_mood">Mood Level:</span> <span id="moodValue" class="text-cyan-400 font-bold ml-1">5</span>/10
                             </label>
                             <div class="slider-container">
                                 <input 
@@ -159,9 +172,9 @@
                                     class="slider"
                                 >
                                 <div class="flex justify-between text-xs text-gray-500 mt-1">
-                                    <span>😔 Low</span>
-                                    <span>😐 Neutral</span>
-                                    <span>😊 Great</span>
+                                    <span data-i18n="mood_low">😔 Low</span>
+                                    <span data-i18n="mood_neutral">😐 Neutral</span>
+                                    <span data-i18n="mood_great">😊 Great</span>
                                 </div>
                             </div>
                         </div>
@@ -171,7 +184,7 @@
                                 <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                                 </svg>
-                                Heart Rate (BPM)
+                                <span data-i18n="label_heart_rate">Heart Rate (BPM)</span>
                             </label>
                             <div class="flex gap-3">
                                 <input 
@@ -187,11 +200,12 @@
                                     type="button" 
                                     onclick="simulateHeartRate()"
                                     class="btn-secondary px-4"
+                                    data-i18n="btn_simulate"
                                 >
                                     Simulate
                                 </button>
                             </div>
-                            <div class="input-hint">Normal resting: 60-100 BPM</div>
+                            <div class="input-hint" data-i18n="hint_heart_rate">Normal resting: 60-100 BPM</div>
                         </div>
 
                         <div class="input-group">
@@ -199,18 +213,18 @@
                                 <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                 </svg>
-                                Physical Activity Today
+                                <span data-i18n="label_activity">Physical Activity Today</span>
                             </label>
                             <select id="activityLevel" class="input-field">
-                                <option value="none">No Exercise</option>
-                                <option value="light" selected>Light (15-30 min)</option>
-                                <option value="moderate">Moderate (30-60 min)</option>
-                                <option value="intense">Intense (60+ min)</option>
+                                <option value="none" data-i18n="activity_none">No Exercise</option>
+                                <option value="light" selected data-i18n="activity_light">Light (15-30 min)</option>
+                                <option value="moderate" data-i18n="activity_moderate">Moderate (30-60 min)</option>
+                                <option value="intense" data-i18n="activity_intense">Intense (60+ min)</option>
                             </select>
                         </div>
 
                         <button type="submit" class="btn-primary w-full py-4 text-lg font-orbitron">
-                            <span id="analyzeText">Analyze Stress Level</span>
+                            <span id="analyzeText" data-i18n="btn_analyze">Analyze Stress Level</span>
                             <div id="analyzeLoader" class="hidden loader"></div>
                         </button>
                     </form>
@@ -225,14 +239,13 @@
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="font-orbitron font-bold text-lg">ASTRA Recommendations</h2>
-                                <p class="text-gray-400 text-sm">Personalized support for you</p>
+                                <h2 class="font-orbitron font-bold text-lg" data-i18n="rec_title">ASTRA Recommendations</h2>
+                                <p class="text-gray-400 text-sm" data-i18n="rec_subtitle">Personalized support for you</p>
                             </div>
                         </div>
                     </div>
                     <div id="recommendationsList" class="space-y-4">
-                        <!-- Recommendations will be inserted here -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
@@ -240,7 +253,7 @@
                 
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="font-orbitron font-bold text-lg text-center">Current Stress Level</h2>
+                        <h2 class="font-orbitron font-bold text-lg text-center" data-i18n="result_title">Current Stress Level</h2>
                     </div>
                     
                     <div class="flex flex-col items-center">
@@ -272,15 +285,15 @@
                             </svg>
                             <div class="absolute inset-0 flex flex-col items-center justify-center">
                                 <span id="stressPercentage" class="font-orbitron text-4xl font-bold">--</span>
-                                <span class="text-gray-400 text-sm">Stress Score</span>
+                                <span class="text-gray-400 text-sm" data-i18n="result_score_label">Stress Score</span>
                             </div>
                         </div>
 
                         <div id="stressLevelBadge" class="stress-badge stress-badge-low">
-                            <span id="stressLevelText">Awaiting Data</span>
+                            <span id="stressLevelText" data-i18n="result_awaiting">Awaiting Data</span>
                         </div>
 
-                        <p id="stressExplanation" class="text-gray-400 text-sm text-center mt-4">
+                        <p id="stressExplanation" class="text-gray-400 text-sm text-center mt-4" data-i18n="result_instruction">
                             Enter your metrics above and click "Analyze" to check your stress level.
                         </p>
                     </div>
@@ -288,7 +301,7 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="font-orbitron font-bold text-lg">Today's Summary</h2>
+                        <h2 class="font-orbitron font-bold text-lg" data-i18n="summary_title">Today's Summary</h2>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="stat-card">
@@ -298,7 +311,7 @@
                                 </svg>
                             </div>
                             <div class="stat-value" id="lastCheckTime">--:--</div>
-                            <div class="stat-label">Last Check</div>
+                            <div class="stat-label" data-i18n="label_last_check">Last Check</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon bg-purple-500/20 text-purple-400">
@@ -307,7 +320,7 @@
                                 </svg>
                             </div>
                             <div class="stat-value" id="checksToday">0</div>
-                            <div class="stat-label">Checks Today</div>
+                            <div class="stat-label" data-i18n="label_checks_today">Checks Today</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon bg-green-500/20 text-green-400">
@@ -316,7 +329,7 @@
                                 </svg>
                             </div>
                             <div class="stat-value" id="avgStress">--</div>
-                            <div class="stat-label">Avg Stress</div>
+                            <div class="stat-label" data-i18n="label_avg_stress">Avg Stress</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon bg-pink-500/20 text-pink-400">
@@ -325,7 +338,7 @@
                                 </svg>
                             </div>
                             <div class="stat-value" id="crewOnline">--</div>
-                            <div class="stat-label">Crew Online</div>
+                            <div class="stat-label" data-i18n="label_crew_online">Crew Online</div>
                         </div>
                     </div>
                 </div>
@@ -338,10 +351,10 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <h3 class="font-bold text-yellow-400">Crew Alert</h3>
-                            <p id="crewAlertText" class="text-sm text-gray-300">A crew member needs support</p>
+                            <h3 class="font-bold text-yellow-400" data-i18n="alert_title">Crew Alert</h3>
+                            <p id="crewAlertText" class="text-sm text-gray-300" data-i18n="alert_msg">A crew member needs support</p>
                         </div>
-                        <a href="crew.html" class="text-cyan-400 text-sm hover:underline">View</a>
+                        <a href="crew.html" class="text-cyan-400 text-sm hover:underline" data-i18n="btn_view">View</a>
                     </div>
                 </div>
             </div>
@@ -357,17 +370,17 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                 </div>
-                <h2 class="font-orbitron text-2xl font-bold text-red-400 mb-2">High Stress Detected</h2>
-                <p class="text-gray-300 mb-6">ASTRA has detected elevated stress levels. Your crew has been notified. Please take a moment to relax.</p>
+                <h2 class="font-orbitron text-2xl font-bold text-red-400 mb-2" data-i18n="modal_stress_title">High Stress Detected</h2>
+                <p class="text-gray-300 mb-6" data-i18n="modal_stress_msg">ASTRA has detected elevated stress levels. Your crew has been notified. Please take a moment to relax.</p>
                 <div class="flex gap-4 justify-center">
-                    <a href="games.html" class="btn-primary">
+                    <a href="games.html" class="btn-primary" data-i18n="btn_play_game">
                         Play Relaxation Game
                     </a>
-                    <button onclick="openChatbot()" class="btn-secondary">
+                    <button onclick="openChatbot()" class="btn-secondary" data-i18n="btn_talk_astra">
                         Talk to ASTRA
                     </button>
                 </div>
-                <button onclick="closeHighStressModal()" class="mt-4 text-gray-400 hover:text-white text-sm">
+                <button onclick="closeHighStressModal()" class="mt-4 text-gray-400 hover:text-white text-sm" data-i18n="btn_dismiss">
                     Dismiss
                 </button>
             </div>
@@ -394,7 +407,7 @@
                             <h3 class="font-orbitron font-bold">ASTRA</h3>
                             <p class="text-xs text-green-400 flex items-center gap-1">
                                 <span class="w-2 h-2 rounded-full bg-green-400"></span>
-                                Online
+                                <span data-i18n="status_online">Online</span>
                             </p>
                         </div>
                     </div>
@@ -408,7 +421,7 @@
 
             <div id="chatMessages" class="h-80 overflow-y-auto p-4 space-y-4">
                 <div class="chat-message bot">
-                    <div class="message-bubble">
+                    <div class="message-bubble" data-i18n="chat_welcome">
                         Hello, Astronaut! I'm ASTRA, your AI wellness companion. How can I support you today? 🚀
                     </div>
                 </div>
@@ -419,6 +432,7 @@
                     <input 
                         type="text" 
                         id="chatInput" 
+                        data-i18n-placeholder="chat_placeholder"
                         placeholder="Type a message..." 
                         class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyan-500/50"
                     >
@@ -447,6 +461,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 
     <script src="js/firebase.js"></script>
+    <script src="js/translations.js"></script>
     <script src="js/app.js"></script>
     <script src="js/chatbot.js"></script>
 

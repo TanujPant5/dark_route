@@ -14,7 +14,7 @@ const firebaseConfig = {
     storageBucket: "astra-fd9a6.firebasestorage.app",
     messagingSenderId: "972525920210",
     appId: "1:972525920210:web:26a000903fa8649ac9f20b"
-  };
+};
 
 
 // Initialize Firebase
@@ -23,6 +23,17 @@ firebase.initializeApp(firebaseConfig);
 // Initialize Services
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+// -------------------- 
+// Translation Helper
+// -------------------- 
+// Safely calls the global getText function from translations.js
+function t(key, defaultText) {
+    if (typeof getText === 'function') {
+        return getText(key) || defaultText;
+    }
+    return defaultText;
+}
 
 // -------------------- 
 // Authentication State
@@ -56,7 +67,7 @@ function onUserLoggedIn(user) {
         userLoggedOut.classList.add('hidden');
         
         // Set user name and initial
-        const displayName = user.displayName || user.email?.split('@')[0] || 'Astronaut';
+        const displayName = user.displayName || user.email?.split('@')[0] || t('role_astronaut', 'Astronaut');
         if (userName) userName.textContent = displayName;
         if (userInitial) userInitial.textContent = displayName.charAt(0).toUpperCase();
     }
@@ -118,7 +129,7 @@ async function signUp(email, password, displayName) {
             isOnline: true
         });
         
-        showToast('success', 'Welcome aboard!', 'Account created successfully');
+        showToast('success', t('toast_welcome', 'Welcome aboard!'), t('toast_signup_success', 'Account created successfully'));
         
         // Redirect to home
         setTimeout(() => {
@@ -129,7 +140,7 @@ async function signUp(email, password, displayName) {
         
     } catch (error) {
         console.error("Sign up error:", error);
-        showToast('error', 'Sign Up Failed', getAuthErrorMessage(error.code));
+        showToast('error', t('toast_signup_failed', 'Sign Up Failed'), getAuthErrorMessage(error.code));
         return { success: false, error: error.message };
         
     } finally {
@@ -146,7 +157,7 @@ async function signIn(email, password) {
         
         const userCredential = await auth.signInWithEmailAndPassword(email, password);
         
-        showToast('success', 'Welcome back!', 'Logged in successfully');
+        showToast('success', t('toast_welcome_back', 'Welcome back!'), t('toast_login_success', 'Logged in successfully'));
         
         // Update last login
         await updateUserProfile(userCredential.user.uid, {
@@ -163,7 +174,7 @@ async function signIn(email, password) {
         
     } catch (error) {
         console.error("Sign in error:", error);
-        showToast('error', 'Login Failed', getAuthErrorMessage(error.code));
+        showToast('error', t('toast_login_failed', 'Login Failed'), getAuthErrorMessage(error.code));
         return { success: false, error: error.message };
         
     } finally {
@@ -203,7 +214,9 @@ async function signInAnonymously() {
             isAnonymous: true
         });
         
-        showToast('success', 'Welcome!', `Signed in as ${displayName}`);
+        // Use translation with replacement
+        const welcomeMsg = t('toast_anon_login_success', 'Signed in as {name}').replace('{name}', displayName);
+        showToast('success', t('toast_welcome', 'Welcome!'), welcomeMsg);
         
         // Redirect to home
         setTimeout(() => {
@@ -214,7 +227,7 @@ async function signInAnonymously() {
         
     } catch (error) {
         console.error("Anonymous sign in error:", error);
-        showToast('error', 'Login Failed', getAuthErrorMessage(error.code));
+        showToast('error', t('toast_login_failed', 'Login Failed'), getAuthErrorMessage(error.code));
         return { success: false, error: error.message };
         
     } finally {
@@ -236,7 +249,7 @@ async function logout() {
         }
         
         await auth.signOut();
-        showToast('success', 'Logged Out', 'See you soon, Astronaut!');
+        showToast('success', t('toast_logged_out', 'Logged Out'), t('toast_logout_msg', 'See you soon, Astronaut!'));
         
         // Redirect to login
         setTimeout(() => {
@@ -245,7 +258,7 @@ async function logout() {
         
     } catch (error) {
         console.error("Logout error:", error);
-        showToast('error', 'Error', 'Failed to logout');
+        showToast('error', t('toast_error', 'Error'), t('toast_logout_failed', 'Failed to logout'));
     }
 }
 
@@ -255,12 +268,12 @@ async function logout() {
 async function resetPassword(email) {
     try {
         await auth.sendPasswordResetEmail(email);
-        showToast('success', 'Email Sent', 'Check your inbox for password reset link');
+        showToast('success', t('toast_email_sent', 'Email Sent'), t('toast_reset_msg', 'Check your inbox for password reset link'));
         return { success: true };
         
     } catch (error) {
         console.error("Password reset error:", error);
-        showToast('error', 'Error', getAuthErrorMessage(error.code));
+        showToast('error', t('toast_error', 'Error'), getAuthErrorMessage(error.code));
         return { success: false, error: error.message };
     }
 }
@@ -300,7 +313,7 @@ async function loadUserProfile(userId) {
             
             // Create default profile
             const defaultProfile = {
-                displayName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Astronaut',
+                displayName: currentUser.displayName || currentUser.email?.split('@')[0] || t('role_astronaut', 'Astronaut'),
                 email: currentUser.email,
                 role: 'Astronaut',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -351,7 +364,9 @@ function updateProfileUI(profile) {
     }
     
     if (avgStress) {
-        avgStress.textContent = capitalizeFirst(profile.stressLevel || 'low');
+        // Translate the mood level
+        const levelKey = `mood_${profile.stressLevel || 'low'}`; // e.g., mood_low, mood_high
+        avgStress.textContent = t(levelKey, capitalizeFirst(profile.stressLevel || 'low'));
     }
 }
 
@@ -404,14 +419,17 @@ async function createCrewAlert(userId, stressData) {
     try {
         // Get user's display name
         const userDoc = await db.collection('users').doc(userId).get();
-        const userName = userDoc.exists ? userDoc.data().displayName : 'A crew member';
+        const userName = userDoc.exists ? userDoc.data().displayName : t('crew_member', 'A crew member');
         
+        // Use translated message template
+        const alertMsg = t('alert_msg_generated', '{name} is experiencing high stress and may need support.').replace('{name}', userName);
+
         await db.collection('crewAlerts').add({
             userId: userId,
             userName: userName,
             stressLevel: stressData.level,
             stressScore: stressData.score,
-            message: `${userName} is experiencing high stress and may need support.`,
+            message: alertMsg,
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             isRead: false,
             isActive: true
@@ -545,7 +563,7 @@ function showCrewAlertNotification(alert) {
     }
     
     // Also show toast
-    showToast('warning', 'Crew Alert', alert.message);
+    showToast('warning', t('toast_crew_alert', 'Crew Alert'), alert.message);
 }
 
 // Update online status
@@ -670,25 +688,31 @@ async function getChatHistory(limit = 20) {
 // Helper Functions
 // -------------------- 
 
-// Get friendly auth error messages
+// Get friendly auth error messages with Translations
 function getAuthErrorMessage(errorCode) {
-    const errorMessages = {
-        'auth/email-already-in-use': 'This email is already registered',
-        'auth/invalid-email': 'Please enter a valid email address',
-        'auth/operation-not-allowed': 'Email/password accounts are not enabled',
-        'auth/weak-password': 'Password should be at least 6 characters',
-        'auth/user-disabled': 'This account has been disabled',
-        'auth/user-not-found': 'No account found with this email',
-        'auth/wrong-password': 'Incorrect password',
-        'auth/too-many-requests': 'Too many attempts. Please try again later',
-        'auth/network-request-failed': 'Network error. Please check your connection'
+    const errorKeyMap = {
+        'auth/email-already-in-use': 'auth_email_in_use',
+        'auth/invalid-email': 'auth_invalid_email',
+        'auth/operation-not-allowed': 'auth_operation_not_allowed',
+        'auth/weak-password': 'auth_weak_password',
+        'auth/user-disabled': 'auth_user_disabled',
+        'auth/user-not-found': 'auth_user_not_found',
+        'auth/wrong-password': 'auth_wrong_password',
+        'auth/too-many-requests': 'auth_too_many_requests',
+        'auth/network-request-failed': 'auth_network_error'
     };
     
-    return errorMessages[errorCode] || 'An error occurred. Please try again';
+    const key = errorKeyMap[errorCode];
+    if (key) {
+        return t(key, 'Authentication Error');
+    }
+    
+    return t('auth_unknown_error', 'An error occurred. Please try again');
 }
 
 // Capitalize first letter
 function capitalizeFirst(string) {
+    if (!string) return '';
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
@@ -696,6 +720,12 @@ function capitalizeFirst(string) {
 function showAuthLoader(show) {
     const loader = document.getElementById('authLoader');
     const btnText = document.getElementById('authBtnText');
+    
+    // Also handle specific form loaders
+    const loginLoader = document.getElementById('loginLoader');
+    const loginBtnText = document.getElementById('loginBtnText');
+    const signupLoader = document.getElementById('signupLoader');
+    const signupBtnText = document.getElementById('signupBtnText');
     
     if (loader && btnText) {
         if (show) {
@@ -789,9 +819,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize crew count after a short delay to ensure auth is ready
     setTimeout(initializeCrewCount, 1500);
 });
-
-// -------------------- 
-// Export for module usage (optional)
-// -------------------- 
-// If using modules, uncomment below:
-// export { auth, db, signUp, signIn, signInAnonymously, logout, ... };

@@ -1,19 +1,20 @@
 ASTRA/
 │
-├── index.html          # Home - Stress Detection
-├── crew.html           # Crew Dashboard
-├── games.html          # Stress Relief Games
-├── login.html          # Login Page
+├── index.html          # Updated with data-i18n attributes for static text
+├── crew.html           # Updated with data-i18n attributes
+├── games.html          # Updated with data-i18n attributes
+├── login.html          # Updated with data-i18n attributes
 │
 ├── css/
-│   └── styles.css      # All custom styles + animations
+│   └── styles.css      
 │
 ├── js/
-│   ├── firebase.js     # Firebase config + auth + database
-│   ├── app.js          # Stress detection + recommendations
-│   ├── crew.js         # Crew monitoring + alerts
-│   ├── games.js        # Mini-games
-│   └── chatbot.js      # ASTRA AI (Gemini API)
+│   ├── translations.js # [NEW] Contains dictionaries for EN, ES, FR, etc.
+│   ├── firebase.js     # Updated to translate auth error messages
+│   ├── app.js          # Updated to translate stress results/recommendations
+│   ├── crew.js         # Updated to translate alerts and status
+│   ├── games.js        # Updated to translate game instructions/feedback
+│   └── chatbot.js      # Updated to inject language context into AI prompt
 │
 └── assets/
-    └── logo.svg        # ASTRA logo (optional)
+    └── logo.svg

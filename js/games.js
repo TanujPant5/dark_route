@@ -4,6 +4,17 @@
    ======================================== */
 
 // -------------------- 
+// Translation Helper
+// -------------------- 
+// Safely calls the global getText function from translations.js
+function t(key, defaultText) {
+    if (typeof getText === 'function') {
+        return getText(key) || defaultText;
+    }
+    return defaultText;
+}
+
+// -------------------- 
 // Game State
 // -------------------- 
 let currentGame = null;
@@ -339,18 +350,19 @@ function endStarCatcher() {
     const messageEl = document.getElementById('gameOverMessage');
     if (messageEl) {
         if (starCatcherState.score >= 500) {
-            messageEl.textContent = "🌟 Stellar Performance! You're a true star catcher!";
+            messageEl.textContent = t('star_msg_stellar', "🌟 Stellar Performance! You're a true star catcher!");
         } else if (starCatcherState.score >= 300) {
-            messageEl.textContent = "✨ Great job! The cosmos is proud of you!";
+            messageEl.textContent = t('star_msg_great', "✨ Great job! The cosmos is proud of you!");
         } else if (starCatcherState.score >= 150) {
-            messageEl.textContent = "⭐ Good effort! Keep reaching for the stars!";
+            messageEl.textContent = t('star_msg_good', "⭐ Good effort! Keep reaching for the stars!");
         } else {
-            messageEl.textContent = "💫 Nice try! Every astronaut starts somewhere!";
+            messageEl.textContent = t('star_msg_nice', "💫 Nice try! Every astronaut starts somewhere!");
         }
     }
     
     // Show toast
-    showToast('success', 'Game Complete!', `You scored ${starCatcherState.score} points`);
+    const scoreMsg = t('toast_score_msg', 'You scored {score} points').replace('{score}', starCatcherState.score);
+    showToast('success', t('toast_game_complete', 'Game Complete!'), scoreMsg);
 }
 
 function resetStarCatcher() {
@@ -390,10 +402,10 @@ function playStarCatchSound() {
 // ========================================
 
 const BREATHING_PHASES = {
-    inhale: { duration: 4, next: 'hold', text: 'Breathe In...', color: 'from-cyan-500 to-blue-600' },
-    hold: { duration: 4, next: 'exhale', text: 'Hold...', color: 'from-blue-600 to-purple-600' },
-    exhale: { duration: 6, next: 'rest', text: 'Breathe Out...', color: 'from-purple-600 to-pink-600' },
-    rest: { duration: 2, next: 'inhale', text: 'Rest...', color: 'from-pink-600 to-cyan-500' }
+    inhale: { duration: 4, next: 'hold', textKey: 'breath_phase_in', defaultText: 'Breathe In...', color: 'from-cyan-500 to-blue-600' },
+    hold: { duration: 4, next: 'exhale', textKey: 'breath_phase_hold', defaultText: 'Hold...', color: 'from-blue-600 to-purple-600' },
+    exhale: { duration: 6, next: 'rest', textKey: 'breath_phase_out', defaultText: 'Breathe Out...', color: 'from-purple-600 to-pink-600' },
+    rest: { duration: 2, next: 'inhale', textKey: 'breath_phase_rest', defaultText: 'Rest...', color: 'from-pink-600 to-cyan-500' }
 };
 
 function startBreathingExercise() {
@@ -430,9 +442,16 @@ function runBreathingPhase() {
     const cycleCounter = document.getElementById('breathingCycleCounter');
     const progressBar = document.getElementById('breathingProgressBar');
     
-    // Update text
-    if (text) text.textContent = phase.text;
-    if (cycleCounter) cycleCounter.textContent = `Cycle ${breathingState.cyclesCompleted + 1} of ${breathingState.totalCycles}`;
+    // Update text with translation
+    if (text) text.textContent = t(phase.textKey, phase.defaultText);
+    
+    // Update cycle counter with translation
+    if (cycleCounter) {
+        const cycleText = t('breath_cycle_count', 'Cycle {current} of {total}')
+            .replace('{current}', breathingState.cyclesCompleted + 1)
+            .replace('{total}', breathingState.totalCycles);
+        cycleCounter.textContent = cycleText;
+    }
     
     // Update circle animation
     if (circle) {
@@ -523,7 +542,7 @@ function completeBreathingExercise() {
     if (cyclesDisplay) cyclesDisplay.textContent = breathingState.totalCycles;
     
     // Show toast
-    showToast('success', 'Well Done!', 'Breathing exercise complete. Feel more relaxed?');
+    showToast('success', t('toast_well_done', 'Well Done!'), t('toast_breath_complete', 'Breathing exercise complete. Feel more relaxed?'));
 }
 
 function stopBreathingExercise() {
@@ -675,7 +694,10 @@ function loadConstellation(index) {
         });
     }
     
-    if (nameDisplay) nameDisplay.textContent = `Connect: ${constellationState.currentConstellation.name}`;
+    if (nameDisplay) {
+        const connectText = t('const_connect', 'Connect: {name}').replace('{name}', constellationState.currentConstellation.name);
+        nameDisplay.textContent = connectText;
+    }
     if (progressDisplay) progressDisplay.textContent = `${index + 1} / ${CONSTELLATIONS.length}`;
 }
 
@@ -797,7 +819,8 @@ function completeConstellationGame() {
     if (completeScreen) completeScreen.classList.remove('hidden');
     if (finalScore) finalScore.textContent = constellationState.score;
     
-    showToast('success', 'Constellation Master!', `You scored ${constellationState.score} points`);
+    const scoreMsg = t('toast_score_msg', 'You scored {score} points').replace('{score}', constellationState.score);
+    showToast('success', t('toast_const_master', 'Constellation Master!'), scoreMsg);
 }
 
 function resetConstellationGame() {

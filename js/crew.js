@@ -1,3 +1,14 @@
+// -------------------- 
+// Translation Helper
+// -------------------- 
+// Safely calls the global getText function from translations.js
+function t(key, defaultText) {
+    if (typeof getText === 'function') {
+        return getText(key) || defaultText;
+    }
+    return defaultText;
+}
+
 const crewGrid = document.getElementById('crewGrid');
 const crewCount = document.getElementById('crewCount');
 const onlineCount = document.getElementById('onlineCount');
@@ -59,7 +70,7 @@ function subscribeToCrewMembers() {
             console.error('Error subscribing to crew:', error);
             showLoadingState(false);
             updateConnectionStatus('offline');
-            showToast('error', 'Connection Error', 'Unable to load crew data');
+            showToast('error', t('error_connection', 'Connection Error'), t('error_load_crew', 'Unable to load crew data'));
         });
 }
 
@@ -76,8 +87,8 @@ function renderCrewMembers() {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-400">No Crew Members Found</h3>
-                <p class="text-gray-500 text-sm mt-2">Crew members will appear here once they log in.</p>
+                <h3 class="text-lg font-semibold text-gray-400">${t('crew_empty_title', 'No Crew Members Found')}</h3>
+                <p class="text-gray-500 text-sm mt-2">${t('crew_empty_msg', 'Crew members will appear here once they log in.')}</p>
             </div>
         `;
         return;
@@ -121,14 +132,20 @@ function createCrewCard(member, index) {
     const colorIndex = member.displayName ? member.displayName.charCodeAt(0) % avatarColors.length : 0;
     const avatarColor = avatarColors[colorIndex];
     
-    let lastCheckIn = 'Never';
+    let lastCheckIn = t('time_never', 'Never');
     if (member.lastCheckIn) {
         const date = member.lastCheckIn.toDate ? member.lastCheckIn.toDate() : new Date(member.lastCheckIn);
         lastCheckIn = formatTimeAgo(date);
     }
     
     const statusConfig = getStatusConfig(stressLevel);
-    
+    const onlineStatusText = member.isOnline ? `🟢 ${t('status_online', 'Online')}` : `⚫ ${t('status_offline', 'Offline')}`;
+    const unknownAstronaut = t('unknown_astronaut', 'Unknown Astronaut');
+    const roleAstronaut = t('role_astronaut', 'Astronaut');
+    const youLabel = t('label_you', '(You)');
+    const offerSupportLabel = t('btn_offer_support', 'Offer Support');
+    const lastCheckLabel = t('label_last_check_card', 'Last check');
+
     card.innerHTML = `
         ${isHighStress ? `
             <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-pink-500"></div>
@@ -140,12 +157,12 @@ function createCrewCard(member, index) {
         
         <div class="crew-info">
             <div class="crew-name flex items-center gap-2">
-                ${member.displayName || 'Unknown Astronaut'}
-                ${isCurrentUser ? '<span class="text-xs text-cyan-400">(You)</span>' : ''}
+                ${member.displayName || unknownAstronaut}
+                ${isCurrentUser ? `<span class="text-xs text-cyan-400">${youLabel}</span>` : ''}
             </div>
-            <div class="crew-role">${member.role || 'Astronaut'}</div>
+            <div class="crew-role">${member.role || roleAstronaut}</div>
             <div class="text-xs text-gray-500 mt-1">
-                Last check: ${lastCheckIn}
+                ${lastCheckLabel}: ${lastCheckIn}
             </div>
         </div>
         
@@ -157,7 +174,7 @@ function createCrewCard(member, index) {
                 </span>
             </div>
             <div class="text-xs text-gray-500 mt-1">
-                ${member.isOnline ? '🟢 Online' : '⚫ Offline'}
+                ${onlineStatusText}
             </div>
         </div>
         
@@ -166,7 +183,7 @@ function createCrewCard(member, index) {
                 onclick="offerSupport('${member.id}', '${member.displayName}')"
                 class="absolute bottom-3 right-3 text-xs bg-red-500/20 text-red-400 px-3 py-1 rounded-full hover:bg-red-500/30 transition-colors"
             >
-                Offer Support
+                ${offerSupportLabel}
             </button>
         ` : ''}
     `;
@@ -177,19 +194,19 @@ function createCrewCard(member, index) {
 function getStatusConfig(stressLevel) {
     const configs = {
         low: {
-            label: 'Low Stress',
+            label: t('mood_low_stress', 'Low Stress'),
             textColor: 'text-green-400',
             bgColor: 'bg-green-500/20',
             borderColor: 'border-green-500/30'
         },
         medium: {
-            label: 'Medium Stress',
+            label: t('mood_medium_stress', 'Medium Stress'),
             textColor: 'text-yellow-400',
             bgColor: 'bg-yellow-500/20',
             borderColor: 'border-yellow-500/30'
         },
         high: {
-            label: 'High Stress',
+            label: t('mood_high_stress', 'High Stress'),
             textColor: 'text-red-400',
             bgColor: 'bg-red-500/20',
             borderColor: 'border-red-500/30'
@@ -274,7 +291,7 @@ function createAlertCard(alert, index) {
     div.className = 'alert-banner danger fade-in';
     div.style.animationDelay = `${index * 0.1}s`;
     
-    let timeAgo = 'Just now';
+    let timeAgo = t('time_just_now', 'Just now');
     if (alert.timestamp) {
         const date = alert.timestamp.toDate ? alert.timestamp.toDate() : new Date(alert.timestamp);
         timeAgo = formatTimeAgo(date);
@@ -288,7 +305,7 @@ function createAlertCard(alert, index) {
         </div>
         <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between">
-                <h4 class="font-semibold text-red-400">${alert.userName || 'A crew member'}</h4>
+                <h4 class="font-semibold text-red-400">${alert.userName || t('crew_member', 'A crew member')}</h4>
                 <span class="text-xs text-gray-500">${timeAgo}</span>
             </div>
             <p class="text-sm text-gray-300 mt-1">${alert.message}</p>
@@ -296,7 +313,7 @@ function createAlertCard(alert, index) {
         <button 
             onclick="dismissAlert('${alert.id}')"
             class="text-gray-500 hover:text-white p-1 flex-shrink-0"
-            title="Dismiss alert"
+            title="${t('btn_dismiss_alert', 'Dismiss alert')}"
         >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -331,27 +348,31 @@ async function dismissAlert(alertId) {
             dismissedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        showToast('success', 'Alert Dismissed', 'The alert has been acknowledged');
+        showToast('success', t('toast_alert_dismissed', 'Alert Dismissed'), t('toast_alert_ack', 'The alert has been acknowledged'));
         
     } catch (error) {
         console.error('Error dismissing alert:', error);
-        showToast('error', 'Error', 'Failed to dismiss alert');
+        showToast('error', t('error_title', 'Error'), t('error_dismiss_alert', 'Failed to dismiss alert'));
     }
 }
 
 async function offerSupport(memberId, memberName) {
     try {
+        const fromName = currentUser?.displayName || t('crew_member', 'A crew member');
+        const supportMsg = t('support_msg', '{name} is checking in on you and offering support.').replace('{name}', fromName);
+
         await db.collection('users').doc(memberId)
             .collection('notifications').add({
                 type: 'support',
                 fromUserId: currentUser?.uid,
-                fromUserName: currentUser?.displayName || 'A crew member',
-                message: `${currentUser?.displayName || 'A crew member'} is checking in on you and offering support.`,
+                fromUserName: fromName,
+                message: supportMsg,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                 isRead: false
             });
         
-        showToast('success', 'Support Offered', `${memberName} has been notified that you're thinking of them`);
+        const notifyMsg = t('toast_support_sent_msg', '{name} has been notified that you\'re thinking of them').replace('{name}', memberName);
+        showToast('success', t('toast_support_sent', 'Support Offered'), notifyMsg);
         
         if (typeof openChatbot === 'function') {
             openChatbot();
@@ -359,15 +380,15 @@ async function offerSupport(memberId, memberName) {
         
     } catch (error) {
         console.error('Error offering support:', error);
-        showToast('error', 'Error', 'Failed to send support notification');
+        showToast('error', t('error_title', 'Error'), t('error_send_support', 'Failed to send support notification'));
     }
 }
 
 function showAlertNotification(alert) {
-    showToast('warning', '⚠️ Crew Alert', alert.message);
+    showToast('warning', `⚠️ ${t('toast_crew_alert', 'Crew Alert')}`, alert.message);
     
     if (Notification.permission === 'granted') {
-        new Notification('ASTRA - Crew Alert', {
+        new Notification(`ASTRA - ${t('toast_crew_alert', 'Crew Alert')}`, {
             body: alert.message,
             icon: '/assets/logo.svg',
             tag: 'crew-alert'
@@ -402,7 +423,7 @@ async function requestNotificationPermission() {
     if ('Notification' in window && Notification.permission === 'default') {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            showToast('success', 'Notifications Enabled', 'You will receive crew alerts');
+            showToast('success', t('toast_notif_enabled', 'Notifications Enabled'), t('toast_notif_msg', 'You will receive crew alerts'));
         }
     }
 }
@@ -434,15 +455,15 @@ function updateConnectionStatus(status) {
     if (status === 'online') {
         dot?.classList.remove('offline', 'syncing');
         dot?.classList.add('online');
-        if (text) text.textContent = 'Connected';
+        if (text) text.textContent = t('status_connected', 'Connected');
     } else if (status === 'syncing') {
         dot?.classList.remove('online', 'offline');
         dot?.classList.add('syncing');
-        if (text) text.textContent = 'Syncing...';
+        if (text) text.textContent = t('status_syncing', 'Syncing...');
     } else {
         dot?.classList.remove('online', 'syncing');
         dot?.classList.add('offline');
-        if (text) text.textContent = 'Offline';
+        if (text) text.textContent = t('status_offline', 'Offline');
     }
 }
 
@@ -455,10 +476,10 @@ function formatTimeAgo(date) {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
     
-    if (seconds < 60) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
+    if (seconds < 60) return t('time_just_now', 'Just now');
+    if (minutes < 60) return t('time_m_ago', '{m}m ago').replace('{m}', minutes);
+    if (hours < 24) return t('time_h_ago', '{h}h ago').replace('{h}', hours);
+    if (days < 7) return t('time_d_ago', '{d}d ago').replace('{d}', days);
     
     return date.toLocaleDateString();
 }
@@ -497,7 +518,7 @@ function renderFilteredCrew(crew) {
     if (crew.length === 0) {
         crewGrid.innerHTML = `
             <div class="col-span-full text-center py-12">
-                <p class="text-gray-400">No crew members match this filter.</p>
+                <p class="text-gray-400">${t('crew_filter_empty', 'No crew members match this filter.')}</p>
             </div>
         `;
         return;
@@ -516,7 +537,7 @@ function refreshCrewData() {
     setTimeout(() => {
         showLoadingState(false);
         updateConnectionStatus('online');
-        showToast('success', 'Data Refreshed', 'Crew data is up to date');
+        showToast('success', t('toast_data_refreshed', 'Data Refreshed'), t('toast_data_uptodate', 'Crew data is up to date'));
     }, 1000);
 }
 

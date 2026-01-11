@@ -54,28 +54,35 @@
                     <span class="font-orbitron font-bold text-xl tracking-wider">ASTRA</span>
                 </a>
 
-                <div class="hidden md:flex items-center gap-8">
-                    <a href="index.html" class="nav-link">Stress Check</a>
-                    <a href="crew.html" class="nav-link active">Crew Status</a>
-                    <a href="games.html" class="nav-link">Relaxation</a>
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="index.html" class="nav-link" data-i18n="nav_stress">Stress Check</a>
+                    <a href="crew.html" class="nav-link active" data-i18n="nav_crew">Crew Status</a>
+                    <a href="games.html" class="nav-link" data-i18n="nav_relax">Relaxation</a>
+
+                    <select id="languageSelector" onchange="changeLanguage(this.value)" class="bg-white/5 border border-white/20 rounded-md text-xs text-gray-300 px-2 py-1 focus:outline-none focus:border-cyan-500 cursor-pointer hover:bg-white/10 transition-colors">
+                        <option value="en">🇺🇸 EN</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="fr">🇫🇷 FR</option>
+                        <option value="hi">🇮🇳 HI</option>
+                    </select>
                 </div>
 
                 <div class="flex items-center gap-4">
                     <div id="connectionStatus" class="connection-status hidden md:flex">
                         <div class="connection-dot online"></div>
-                        <span class="text-gray-400">Connected</span>
+                        <span class="text-gray-400" data-i18n="status_connected">Connected</span>
                     </div>
 
                     <div id="userSection" class="flex items-center gap-4">
                         <div id="userLoggedOut">
-                            <a href="login.html" class="btn-primary text-sm px-4 py-2">Login</a>
+                            <a href="login.html" class="btn-primary text-sm px-4 py-2" data-i18n="nav_login">Login</a>
                         </div>
                         <div id="userLoggedIn" class="hidden flex items-center gap-3">
                             <span id="userName" class="text-sm text-gray-300 hidden lg:block"></span>
                             <div class="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center cursor-pointer">
                                 <span id="userInitial" class="font-bold text-sm">A</span>
                             </div>
-                            <button onclick="logout()" class="text-gray-400 hover:text-white text-sm hidden lg:block">Logout</button>
+                            <button onclick="logout()" class="text-gray-400 hover:text-white text-sm hidden lg:block" data-i18n="nav_logout">Logout</button>
                         </div>
                     </div>
                 </div>
@@ -89,9 +96,15 @@
 
             <div id="mobileMenu" class="hidden md:hidden mt-4 pb-4 border-t border-white/10 pt-4">
                 <div class="flex flex-col gap-4">
-                    <a href="index.html" class="nav-link">Stress Check</a>
-                    <a href="crew.html" class="nav-link active">Crew Status</a>
-                    <a href="games.html" class="nav-link">Relaxation</a>
+                    <a href="index.html" class="nav-link" data-i18n="nav_stress">Stress Check</a>
+                    <a href="crew.html" class="nav-link active" data-i18n="nav_crew">Crew Status</a>
+                    <a href="games.html" class="nav-link" data-i18n="nav_relax">Relaxation</a>
+                    <select onchange="changeLanguage(this.value)" class="bg-white/5 border border-white/20 rounded-md text-sm text-gray-300 px-3 py-2 w-full focus:outline-none focus:border-cyan-500">
+                        <option value="en">🇺🇸 English</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="hi">🇮🇳 Hindi</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -102,10 +115,10 @@
         <section class="mb-8">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <h1 class="font-orbitron text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    <h1 class="font-orbitron text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent" data-i18n="crew_title">
                         Crew Status Dashboard
                     </h1>
-                    <p class="text-gray-400">
+                    <p class="text-gray-400" data-i18n="crew_subtitle">
                         Real-time monitoring of your crewmates' well-being. Privacy-first: only stress levels are shared.
                     </p>
                 </div>
@@ -118,7 +131,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
-                        <span class="hidden sm:inline">Notifications</span>
+                        <span class="hidden sm:inline" data-i18n="btn_notifications">Notifications</span>
                     </button>
                     <button 
                         onclick="refreshCrewData()"
@@ -127,7 +140,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                        <span class="hidden sm:inline">Refresh</span>
+                        <span class="hidden sm:inline" data-i18n="btn_refresh">Refresh</span>
                     </button>
                 </div>
             </div>
@@ -143,7 +156,7 @@
                     </div>
                     <div>
                         <div class="font-orbitron text-2xl font-bold" id="crewCount">--</div>
-                        <div class="text-gray-400 text-sm">Total Crew</div>
+                        <div class="text-gray-400 text-sm" data-i18n="stat_total_crew">Total Crew</div>
                     </div>
                 </div>
             </div>
@@ -157,7 +170,7 @@
                     </div>
                     <div>
                         <div class="font-orbitron text-2xl font-bold text-green-400" id="onlineCount">--</div>
-                        <div class="text-gray-400 text-sm">Online Now</div>
+                        <div class="text-gray-400 text-sm" data-i18n="stat_online_now">Online Now</div>
                     </div>
                 </div>
             </div>
@@ -172,7 +185,7 @@
                     </div>
                     <div>
                         <div class="font-orbitron text-2xl font-bold text-yellow-400" id="alertsCount">0</div>
-                        <div class="text-gray-400 text-sm">Active Alerts</div>
+                        <div class="text-gray-400 text-sm" data-i18n="stat_active_alerts">Active Alerts</div>
                     </div>
                 </div>
             </div>
@@ -186,7 +199,7 @@
                     </div>
                     <div>
                         <div class="font-orbitron text-2xl font-bold text-red-400" id="highStressCount">0</div>
-                        <div class="text-gray-400 text-sm">Need Support</div>
+                        <div class="text-gray-400 text-sm" data-i18n="stat_need_support">Need Support</div>
                     </div>
                 </div>
             </div>
@@ -205,8 +218,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 class="font-orbitron font-bold text-lg">Crew Members</h2>
-                                    <p class="text-gray-400 text-sm">Real-time status updates</p>
+                                    <h2 class="font-orbitron font-bold text-lg" data-i18n="crew_list_title">Crew Members</h2>
+                                    <p class="text-gray-400 text-sm" data-i18n="crew_list_subtitle">Real-time status updates</p>
                                 </div>
                             </div>
                             
@@ -215,6 +228,7 @@
                                     data-filter="all"
                                     onclick="filterCrew('all')"
                                     class="text-xs px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors active bg-white/10"
+                                    data-i18n="filter_all"
                                 >
                                     All
                                 </button>
@@ -222,6 +236,7 @@
                                     data-filter="online"
                                     onclick="filterCrew('online')"
                                     class="text-xs px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors"
+                                    data-i18n="filter_online"
                                 >
                                     Online
                                 </button>
@@ -229,6 +244,7 @@
                                     data-filter="high-stress"
                                     onclick="filterCrew('high-stress')"
                                     class="text-xs px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors"
+                                    data-i18n="filter_high_stress"
                                 >
                                     High Stress
                                 </button>
@@ -238,7 +254,7 @@
 
                     <div id="crewLoadingState" class="py-12 text-center">
                         <div class="loader mx-auto mb-4"></div>
-                        <p class="text-gray-400">Loading crew data...</p>
+                        <p class="text-gray-400" data-i18n="loading_crew">Loading crew data...</p>
                     </div>
 
                     <div id="crewGrid" class="grid sm:grid-cols-2 gap-4">
@@ -251,8 +267,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <div>
-                            <h4 class="font-semibold text-cyan-400 text-sm">Privacy First</h4>
-                            <p class="text-gray-400 text-sm mt-1">
+                            <h4 class="font-semibold text-cyan-400 text-sm" data-i18n="privacy_title">Privacy First</h4>
+                            <p class="text-gray-400 text-sm mt-1" data-i18n="privacy_msg">
                                 Only stress levels (Low/Medium/High) are shared with the crew. Individual health metrics, sleep data, and personal details remain private.
                             </p>
                         </div>
@@ -271,8 +287,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="font-orbitron font-bold text-lg">Active Alerts</h2>
-                                <p class="text-gray-400 text-sm">Crew members needing support</p>
+                                <h2 class="font-orbitron font-bold text-lg" data-i18n="alerts_section_title">Active Alerts</h2>
+                                <p class="text-gray-400 text-sm" data-i18n="alerts_section_subtitle">Crew members needing support</p>
                             </div>
                         </div>
                     </div>
@@ -286,8 +302,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
-                        <h3 class="font-semibold text-green-400">All Clear</h3>
-                        <p class="text-gray-500 text-sm mt-1">No active alerts. Everyone is doing well!</p>
+                        <h3 class="font-semibold text-green-400" data-i18n="alerts_all_clear_title">All Clear</h3>
+                        <p class="text-gray-500 text-sm mt-1" data-i18n="alerts_all_clear_msg">No active alerts. Everyone is doing well!</p>
                     </div>
                 </div>
 
@@ -299,15 +315,15 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <h3 class="font-bold text-red-400">Attention Required</h3>
-                            <p class="text-sm text-gray-400">One or more crew members are experiencing high stress levels.</p>
+                            <h3 class="font-bold text-red-400" data-i18n="alert_attention_title">Attention Required</h3>
+                            <p class="text-sm text-gray-400" data-i18n="alert_attention_msg">One or more crew members are experiencing high stress levels.</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="font-orbitron font-bold text-lg">Quick Actions</h2>
+                        <h2 class="font-orbitron font-bold text-lg" data-i18n="qa_title">Quick Actions</h2>
                     </div>
                     <div class="space-y-3">
                         <a href="index.html" class="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
@@ -317,8 +333,8 @@
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <div class="font-medium">Check Your Stress</div>
-                                <div class="text-xs text-gray-500">Run a quick analysis</div>
+                                <div class="font-medium" data-i18n="qa_check_stress">Check Your Stress</div>
+                                <div class="text-xs text-gray-500" data-i18n="qa_check_stress_sub">Run a quick analysis</div>
                             </div>
                             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -333,8 +349,8 @@
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <div class="font-medium">Relaxation Games</div>
-                                <div class="text-xs text-gray-500">De-stress with mini-games</div>
+                                <div class="font-medium" data-i18n="qa_games">Relaxation Games</div>
+                                <div class="text-xs text-gray-500" data-i18n="qa_games_sub">De-stress with mini-games</div>
                             </div>
                             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -348,8 +364,8 @@
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <div class="font-medium">Talk to ASTRA</div>
-                                <div class="text-xs text-gray-500">Get emotional support</div>
+                                <div class="font-medium" data-i18n="qa_chat">Talk to ASTRA</div>
+                                <div class="text-xs text-gray-500" data-i18n="qa_chat_sub">Get emotional support</div>
                             </div>
                             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -366,21 +382,47 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="font-bold text-purple-400">Connected Mode</h3>
-                            <p class="text-xs text-gray-400">Real-time sync active</p>
+                            <h3 class="font-bold text-purple-400" data-i18n="connected_mode_title">Connected Mode</h3>
+                            <p class="text-xs text-gray-400" data-i18n="connected_mode_sub">Real-time sync active</p>
                         </div>
                     </div>
-                    <p class="text-sm text-gray-400">
+                    <p class="text-sm text-gray-400" data-i18n="connected_mode_msg">
                         ASTRA is synchronized with the crew network. All stress updates and alerts are shared in real-time.
                     </p>
                     <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
                         <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                        <span>Last sync: Just now</span>
+                        <span data-i18n="last_sync_now">Last sync: Just now</span>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
+    <div id="highStressModal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeHighStressModal()"></div>
+        <div class="modal-content border-red-500/50">
+            <div class="text-center">
+                <div class="w-20 h-20 mx-auto rounded-full bg-red-500/20 flex items-center justify-center mb-4 animate-pulse">
+                    <svg class="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <h2 class="font-orbitron text-2xl font-bold text-red-400 mb-2" data-i18n="modal_stress_title">High Stress Detected</h2>
+                <p class="text-gray-300 mb-6" data-i18n="modal_stress_msg">ASTRA has detected elevated stress levels. Your crew has been notified. Please take a moment to relax.</p>
+                <div class="flex gap-4 justify-center">
+                    <a href="games.html" class="btn-primary" data-i18n="btn_play_game">
+                        Play Relaxation Game
+                    </a>
+                    <button onclick="openChatbot()" class="btn-secondary" data-i18n="btn_talk_astra">
+                        Talk to ASTRA
+                    </button>
+                </div>
+                <button onclick="closeHighStressModal()" class="mt-4 text-gray-400 hover:text-white text-sm" data-i18n="btn_dismiss">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div id="chatbotWidget" class="fixed bottom-6 right-6 z-50">
         <button 
@@ -402,7 +444,7 @@
                             <h3 class="font-orbitron font-bold">ASTRA</h3>
                             <p class="text-xs text-green-400 flex items-center gap-1">
                                 <span class="w-2 h-2 rounded-full bg-green-400"></span>
-                                Online
+                                <span data-i18n="status_online">Online</span>
                             </p>
                         </div>
                     </div>
@@ -416,7 +458,7 @@
 
             <div id="chatMessages" class="h-80 overflow-y-auto p-4 space-y-4">
                 <div class="chat-message bot">
-                    <div class="message-bubble">
+                    <div class="message-bubble" data-i18n="chat_welcome">
                         Hello, Astronaut! I'm ASTRA, your AI wellness companion. How can I support you today? 🚀
                     </div>
                 </div>
@@ -428,6 +470,7 @@
                         type="text" 
                         id="chatInput" 
                         placeholder="Type a message..." 
+                        data-i18n-placeholder="chat_placeholder"
                         class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-cyan-500/50"
                     >
                     <button type="submit" class="btn-primary px-4 py-2">
@@ -455,6 +498,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 
     <script src="js/firebase.js"></script>
+    <script src="js/translations.js"></script>
     <script src="js/crew.js"></script>
     <script src="js/chatbot.js"></script>
 

@@ -40,6 +40,17 @@ let isChatOpen = false;
 let conversationHistory = [];
 let isTyping = false;
 
+// -------------------- 
+// Translation Helper
+// -------------------- 
+// Safely calls the global getText function from translations.js
+function t(key, defaultText) {
+    if (typeof getText === 'function') {
+        return getText(key) || defaultText;
+    }
+    return defaultText;
+}
+
 function debugLog(message, data = null) {
     if (DEBUG_MODE) {
         console.log(`[ASTRA Chatbot] ${message}`);
@@ -135,7 +146,13 @@ function addMessage(text, sender) {
     
     const bubble = document.createElement('div');
     bubble.className = 'message-bubble';
-    bubble.textContent = text;
+    
+    // Check if it's the welcome message to translate it dynamically
+    if (text === "Hello, Astronaut! I'm ASTRA, your AI wellness companion. How can I support you today? 🚀") {
+        bubble.textContent = t('chat_welcome', text);
+    } else {
+        bubble.textContent = text;
+    }
     
     messageDiv.appendChild(bubble);
     chatMessages.appendChild(messageDiv);
@@ -182,12 +199,26 @@ async function getAstraResponse(userMessage) {
     
     debugLog('🔑 API Key found (first 10 chars):', GEMINI_API_KEY.substring(0, 10) + '...');
     
+    // Determine target language from localStorage (set by translations.js)
+    const currentLang = localStorage.getItem('astra_language') || 'en';
+    const langNames = {
+        'en': 'English',
+        'es': 'Spanish',
+        'fr': 'French',
+        'hi': 'Hindi'
+    };
+    const targetLanguage = langNames[currentLang] || 'English';
+    
+    // Create language-specific system prompt
+    const languageInstruction = `\n\nIMPORTANT: Respond in ${targetLanguage}.`;
+    const finalSystemPrompt = ASTRA_SYSTEM_PROMPT + languageInstruction;
+
     try {
         const requestBody = {
             contents: [
                 {
                     role: 'user',
-                    parts: [{ text: ASTRA_SYSTEM_PROMPT + "\n\nNow respond to this message from an astronaut: " + userMessage }]
+                    parts: [{ text: finalSystemPrompt + "\n\nNow respond to this message from an astronaut: " + userMessage }]
                 }
             ],
             generationConfig: {
@@ -199,10 +230,11 @@ async function getAstraResponse(userMessage) {
         };
         
         if (conversationHistory.length > 0) {
+            // Reconstruct history with new system prompt
             requestBody.contents = [
                 {
                     role: 'user',
-                    parts: [{ text: ASTRA_SYSTEM_PROMPT }]
+                    parts: [{ text: finalSystemPrompt }]
                 },
                 {
                     role: 'model',
@@ -255,7 +287,7 @@ async function getAstraResponse(userMessage) {
             return text;
         } else if (data.candidates && data.candidates[0] && data.candidates[0].finishReason === 'SAFETY') {
             debugLog('⚠️ Response blocked by safety filters');
-            return "I want to help, but I need to be careful with my response. Could you rephrase that? I'm here to support you. 💙";
+            return t('chat_safety_block', "I want to help, but I need to be careful with my response. Could you rephrase that? I'm here to support you. 💙");
         } else {
             debugLog('❌ Unexpected response format:', data);
             throw new Error('Invalid API response format');
@@ -278,78 +310,78 @@ function getFallbackResponse(userMessage) {
     
     const lowerMessage = userMessage.toLowerCase();
     
+    // Note: Keyword matching is primarily English-based for fallbacks,
+    // but the responses are now translated via t().
+    
     if (lowerMessage.includes('stress') || lowerMessage.includes('anxious') || lowerMessage.includes('worried')) {
         const stressResponses = [
-            "I hear you, and it's completely normal to feel stressed in space. Let's take a moment together. Try taking 3 deep breaths with me - inhale for 4 counts, hold for 4, exhale for 6. 🌟",
-            "Space missions can be overwhelming. Remember, even the brightest stars need darkness to shine. Would you like to try a quick breathing exercise?",
-            "Your feelings are valid. Stress in isolation is challenging. Let's focus on what you can control right now. Have you had enough sleep lately? 💫"
+            t('fallback_stress_1', "I hear you, and it's completely normal to feel stressed in space. Let's take a moment together. Try taking 3 deep breaths with me - inhale for 4 counts, hold for 4, exhale for 6. 🌟"),
+            t('fallback_stress_2', "Space missions can be overwhelming. Remember, even the brightest stars need darkness to shine. Would you like to try a quick breathing exercise?"),
+            t('fallback_stress_3', "Your feelings are valid. Stress in isolation is challenging. Let's focus on what you can control right now. Have you had enough sleep lately? 💫")
         ];
         return stressResponses[Math.floor(Math.random() * stressResponses.length)];
     }
     
     if (lowerMessage.includes('lonely') || lowerMessage.includes('miss') || lowerMessage.includes('home') || lowerMessage.includes('alone')) {
         const lonelyResponses = [
-            "Missing Earth and loved ones is one of the hardest parts of space travel. Your feelings matter. Would you like to share a favorite memory from home? 🌍",
-            "You're millions of miles from home, but you're not alone. Your crew is with you, and I'm always here. What's something you're looking forward to when you return?",
-            "The distance can feel immense, but your connections remain. Remember, every star you see has its own story of connection across vast distances. 💫"
+            t('fallback_lonely_1', "Missing Earth and loved ones is one of the hardest parts of space travel. Your feelings matter. Would you like to share a favorite memory from home? 🌍"),
+            t('fallback_lonely_2', "You're millions of miles from home, but you're not alone. Your crew is with you, and I'm always here. What's something you're looking forward to when you return?"),
+            t('fallback_lonely_3', "The distance can feel immense, but your connections remain. Remember, every star you see has its own story of connection across vast distances. 💫")
         ];
         return lonelyResponses[Math.floor(Math.random() * lonelyResponses.length)];
     }
     
     if (lowerMessage.includes('sleep') || lowerMessage.includes('tired') || lowerMessage.includes('insomnia') || lowerMessage.includes('rest')) {
         const sleepResponses = [
-            "Sleep in microgravity can be challenging. Try dimming your lights 30 minutes before rest, and avoid screens. Would you like me to guide you through a relaxation technique? 🌙",
-            "Rest is crucial for your mission and well-being. If you're having trouble sleeping, try the 4-7-8 breathing technique: breathe in for 4 seconds, hold for 7, exhale for 8.",
-            "Your body is adapting to an extraordinary environment. Be patient with yourself. A consistent sleep schedule can help, even in orbit. 😴"
+            t('fallback_sleep_1', "Sleep in microgravity can be challenging. Try dimming your lights 30 minutes before rest, and avoid screens. Would you like me to guide you through a relaxation technique? 🌙"),
+            t('fallback_sleep_2', "Rest is crucial for your mission and well-being. If you're having trouble sleeping, try the 4-7-8 breathing technique: breathe in for 4 seconds, hold for 7, exhale for 8."),
+            t('fallback_sleep_3', "Your body is adapting to an extraordinary environment. Be patient with yourself. A consistent sleep schedule can help, even in orbit. 😴")
         ];
         return sleepResponses[Math.floor(Math.random() * sleepResponses.length)];
     }
     
     if (lowerMessage.includes('good') || lowerMessage.includes('great') || lowerMessage.includes('happy') || lowerMessage.includes('fine')) {
         const positiveResponses = [
-            "That's wonderful to hear! 🚀 Keep riding that positive momentum. What's something that made you feel good today?",
-            "Fantastic! Your positive energy is valuable for the whole crew. Remember to store these good feelings - they'll help during tougher times. ⭐",
-            "I'm so glad you're doing well! Maintaining positivity in space is an achievement. Keep up the great work, astronaut! 💪"
+            t('fallback_positive_1', "That's wonderful to hear! 🚀 Keep riding that positive momentum. What's something that made you feel good today?"),
+            t('fallback_positive_2', "Fantastic! Your positive energy is valuable for the whole crew. Remember to store these good feelings - they'll help during tougher times. ⭐"),
+            t('fallback_positive_3', "I'm so glad you're doing well! Maintaining positivity in space is an achievement. Keep up the great work, astronaut! 💪")
         ];
         return positiveResponses[Math.floor(Math.random() * positiveResponses.length)];
     }
     
     if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey') || lowerMessage.match(/^hi$/i)) {
         const greetingResponses = [
-            "Hello, astronaut! It's great to hear from you. How are you feeling today? I'm here to support you. 🚀",
-            "Hey there! I hope your mission is going well. Is there anything on your mind you'd like to talk about?",
-            "Hi! I'm always here for you, whether you need to vent, need advice, or just want some company. What's up? ⭐"
+            t('fallback_greeting_1', "Hello, astronaut! It's great to hear from you. How are you feeling today? I'm here to support you. 🚀"),
+            t('fallback_greeting_2', "Hey there! I hope your mission is going well. Is there anything on your mind you'd like to talk about?"),
+            t('fallback_greeting_3', "Hi! I'm always here for you, whether you need to vent, need advice, or just want some company. What's up? ⭐")
         ];
         return greetingResponses[Math.floor(Math.random() * greetingResponses.length)];
     }
     
     if (lowerMessage.includes('help') || lowerMessage.includes('support') || lowerMessage.includes('need')) {
         const helpResponses = [
-            "I'm here to help. You can talk to me about stress, sleep issues, loneliness, or anything else on your mind. What would you like to discuss? 💫",
-            "Of course, I'm here for you. Whether you need emotional support, stress relief techniques, or just someone to listen, I'm ready. What's going on?",
-            "You've come to the right place. Tell me what's troubling you, and we'll work through it together. 🌟"
+            t('fallback_help_1', "I'm here to help. You can talk to me about stress, sleep issues, loneliness, or anything else on your mind. What would you like to discuss? 💫"),
+            t('fallback_help_2', "Of course, I'm here for you. Whether you need emotional support, stress relief techniques, or just someone to listen, I'm ready. What's going on?"),
+            t('fallback_help_3', "You've come to the right place. Tell me what's troubling you, and we'll work through it together. 🌟")
         ];
         return helpResponses[Math.floor(Math.random() * helpResponses.length)];
     }
     
-    if (lowerMessage.includes('breath') || lowerMessage.includes('calm') || lowerMessage.includes('relax')) {
-        return "Let's do a quick breathing exercise together. 🫁\n\n1. Breathe IN slowly for 4 seconds...\n2. HOLD your breath for 4 seconds...\n3. Breathe OUT slowly for 6 seconds...\n\nRepeat this 4 times. I'll be right here when you're done. How do you feel?";
-    }
-    
     if (lowerMessage.includes('thank') || lowerMessage.includes('thanks')) {
         const thankResponses = [
-            "You're very welcome! Remember, supporting you is my purpose. I'm always here when you need me. 🚀",
-            "Anytime, astronaut! Taking care of your mental health is important. Don't hesitate to reach out again. ⭐",
-            "I'm glad I could help! Keep being kind to yourself - you're doing amazing work up there. 💫"
+            t('fallback_thank_1', "You're very welcome! Remember, supporting you is my purpose. I'm always here when you need me. 🚀"),
+            t('fallback_thank_2', "Anytime, astronaut! Taking care of your mental health is important. Don't hesitate to reach out again. ⭐"),
+            t('fallback_thank_3', "I'm glad I could help! Keep being kind to yourself - you're doing amazing work up there. 💫")
         ];
         return thankResponses[Math.floor(Math.random() * thankResponses.length)];
     }
     
+    // Default Fallbacks
     const defaultResponses = [
-        "I'm here to listen and support you. Could you tell me more about what's on your mind? 🌟",
-        "Thank you for sharing. I'm here for you, whether it's about stress, sleep, emotions, or just needing to talk. What would help you most right now?",
-        "I want to make sure I understand and support you best. Can you tell me a bit more about how you're feeling? 💫",
-        "Every conversation helps me understand you better. Feel free to share what's on your mind - no topic is too big or small. 🚀"
+        t('fallback_default_1', "I'm here to listen and support you. Could you tell me more about what's on your mind? 🌟"),
+        t('fallback_default_2', "Thank you for sharing. I'm here for you, whether it's about stress, sleep, emotions, or just needing to talk. What would help you most right now?"),
+        t('fallback_default_3', "I want to make sure I understand and support you best. Can you tell me a bit more about how you're feeling? 💫"),
+        t('fallback_default_4', "Every conversation helps me understand you better. Feel free to share what's on your mind - no topic is too big or small. 🚀")
     ];
     
     return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
@@ -395,10 +427,11 @@ function sendQuickResponse(text) {
 
 function clearChat() {
     if (chatMessages) {
+        const welcomeMsg = t('chat_welcome', "Hello, Astronaut! I'm ASTRA, your AI wellness companion. How can I support you today? 🚀");
         chatMessages.innerHTML = `
             <div class="chat-message bot">
                 <div class="message-bubble">
-                    Hello, Astronaut! I'm ASTRA, your AI wellness companion. How can I support you today? 🚀
+                    ${welcomeMsg}
                 </div>
             </div>
         `;
